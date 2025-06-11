@@ -564,8 +564,6 @@ backend/
 │   └── setup.ts                    # Configuração dos testes
 ├── docs/                           # Documentação
 │   └── api.yaml                    # Especificação OpenAPI
-├── Dockerfile                      # Configuração do Docker
-├── docker-compose.yml              # Configuração do Docker Compose
 ├── package.json                    # Dependências e scripts
 ├── tsconfig.json                   # Configuração do TypeScript
 └── knexfile.js                     # Configuração do Knex
@@ -634,7 +632,6 @@ frontend/
 │   │   └── receitas.cy.ts
 │   ├── fixtures/
 │   └── support/
-├── Dockerfile
 ├── package.json
 ├── tsconfig.json
 ├── tailwind.config.js
