@@ -78,10 +78,6 @@ Após iniciar os containers, você pode acessar:
 
 Para mais detalhes sobre a implementação técnica, consulte o arquivo `desafio_tecnico.md` na raiz do projeto.
 
-## 🤝 Contribuindo
-
-Contribuições são bem-vindas! Sinta-se à vontade para abrir issues ou enviar pull requests.
-
 ## 📄 Licença
 
 Este projeto está sob a licença [MIT](LICENSE).
