@@ -1,4 +1,5 @@
 .docker
+.output.txt
 .idea
 /tmp
 /out-tsc

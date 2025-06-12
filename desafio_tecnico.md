@@ -549,9 +549,9 @@ backend/
 │   ├── 002_create_categorias.ts
 │   └── 003_create_receitas.ts
 ├── seeds/                          # Seeds para dados iniciais
-│   ├── 01_categorias.js
-│   ├── 02_usuarios_teste.js
-│   └── 03_receitas_exemplo.js
+│   ├── 01_categorias.ts
+│   ├── 02_usuarios_teste.ts
+│   └── 03_receitas_exemplo.ts
 ├── tests/                          # Testes automatizados
 │   ├── unit/                       # Testes unitários
 │   │   ├── services/
@@ -566,7 +566,7 @@ backend/
 │   └── api.yaml                    # Especificação OpenAPI
 ├── package.json                    # Dependências e scripts
 ├── tsconfig.json                   # Configuração do TypeScript
-└── knexfile.js                     # Configuração do Knex
+└── knexfile.ts                     # Configuração do Knex
 ```
 
 ### 6.2 Estrutura do Frontend
@@ -1093,7 +1093,7 @@ echo "Swagger: http://localhost:3001/docs"
 #### Backend - Testes Unitários (Jest)
 ```javascript
 // tests/unit/services/auth.service.test.ts
-import { AuthService } from '../../../src/services/auth.service';
+import { AuthService } from '../../../source/services/auth.service';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
@@ -1182,7 +1182,7 @@ describe('AuthService', () => {
 ```javascript
 // tests/integration/receitas.test.ts
 import request from 'supertest';
-import { app } from '../../src/app';
+import { app } from '../../source/app';
 import { setupTestDB, teardownTestDB } from '../setup';
 
 describe('Receitas API', () => {
@@ -1415,16 +1415,16 @@ Cypress.Commands.add('login', () => {
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  roots: ['<rootDir>/src', '<rootDir>/tests'],
+  roots: ['<rootDir>/source', '<rootDir>/tests'],
   testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
   transform: {
     '^.+\\.ts$': 'ts-jest',
   },
   collectCoverageFrom: [
-    'src/**/*.ts',
-    '!src/**/*.d.ts',
-    '!src/migrations/**',
-    '!src/seeds/**'
+    'source/**/*.ts',
+    '!source/**/*.d.ts',
+    '!source/migrations/**',
+    '!source/seeds/**'
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
@@ -2035,7 +2035,7 @@ function getReceitaCompleta(id: number) {
 {
   "scripts": {
     "start": "node dist/app.js",
-    "dev": "nodemon src/app.ts",
+    "dev": "nodemon source/app.ts",
     "build": "tsc",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -2096,7 +2096,7 @@ if (!componentName) {
   process.exit(1);
 }
 
-const componentDir = path.join(__dirname, '../src/components', componentName);
+const componentDir = path.join(__dirname, '../source/components', componentName);
 fs.mkdirSync(componentDir, { recursive: true });
 
 // Criar arquivos do componente
