@@ -32,18 +32,12 @@ O sistema permite:
 
 ## Instalação
 
-1. Clone o repositório:
-   ```bash
-   git clone https://github.com/seu-usuario/codigo-gourmet.git
-   cd codigo-gourmet/workspaces/backend
-   ```
-
-2. Instale as dependências:
+1. Instale as dependências:
    ```bash
    npm install
    ```
 
-3. Configure as variáveis de ambiente:
+2. Configure as variáveis de ambiente:
    - Crie um arquivo `.env` na raiz do projeto (ou copie o `.env.example` se disponível)
    - Preencha as variáveis conforme o exemplo abaixo:
 
@@ -66,17 +60,12 @@ O sistema permite:
 
 ## Configuração do Banco de Dados
 
-1. Crie um banco de dados MySQL:
-   ```sql
-   CREATE DATABASE codigo_gourmet;
-   ```
-
-2. Execute as migrações para criar as tabelas:
+1. Execute as migrações para criar as tabelas:
    ```bash
    npm run migrate
    ```
 
-3. (Opcional) Execute os seeds para popular o banco com dados iniciais:
+2. (Opcional) Execute os seeds para popular o banco com dados iniciais:
    ```bash
    npm run seed
    ```
@@ -148,6 +137,39 @@ Authorization: Bearer seu_token_jwt
 
 ## Testes
 
+### Estrutura de Testes
+
+```
+tests/
+├── unit/                  # Testes unitários
+│   ├── controllers/       # Testes para controladores
+│   ├── services/          # Testes para serviços
+│   ├── repositories/      # Testes para repositórios
+│   └── middlewares/       # Testes para middlewares
+├── integration/           # Testes de integração
+│   └── api/               # Testes para endpoints da API
+└── setup.ts               # Configuração do ambiente de testes
+```
+
+### Tipos de Testes
+
+- **Testes Unitários**: Testam componentes individuais isoladamente. Eles usam mocks para simular as dependências externas.
+  - **Controllers**: Testam a lógica dos controladores, verificando se eles processam corretamente as requisições e respostas.
+  - **Services**: Testam a lógica de negócio implementada nos serviços.
+  - **Repositories**: Testam a camada de acesso a dados, verificando se as operações de banco de dados são executadas corretamente.
+  - **Middlewares**: Testam os middlewares que processam as requisições antes de chegarem aos controladores.
+
+- **Testes de Integração**: Testam a interação entre diferentes componentes do sistema. Eles usam um banco de dados de teste real (MySQL) para verificar o comportamento completo da aplicação.
+  - **API**: Testam os endpoints da API, verificando se eles retornam as respostas esperadas para diferentes cenários.
+
+- **Testes E2E**: Testam o fluxo completo da API
+
+### Configuração do Ambiente de Testes
+
+Os testes utilizam um banco de dados MySQL dedicado para testes. A configuração está definida no arquivo `knexfile.ts` na raiz do projeto.
+
+O arquivo `setup.ts` contém funções para inicializar e limpar o banco de dados antes e depois dos testes.
+
 ### Executando Testes
 
 ```bash
@@ -159,13 +181,24 @@ npm run test:watch
 
 # Executar testes com cobertura
 npm run test:coverage
+
+# Executar apenas os testes unitários
+npm run test:unit
+
+# Executar apenas os testes de integração
+npm run test:integration
+
+# Executar um arquivo de teste específico
+npm test -- tests/unit/controllers/auth.controller.test.ts
 ```
 
-### Tipos de Testes
+### Boas Práticas de Testes
 
-- **Testes Unitários**: Testam componentes individuais (serviços, repositórios, etc.)
-- **Testes de Integração**: Testam a interação entre componentes
-- **Testes E2E**: Testam o fluxo completo da API
+1. **Isolamento**: Cada teste deve ser independente e não deve depender do estado deixado por outros testes.
+2. **Simplicidade**: Mantenha os testes simples e focados em testar uma única funcionalidade.
+3. **Mocks**: Use mocks para isolar o componente sendo testado de suas dependências externas.
+4. **Limpeza**: Sempre limpe o banco de dados após os testes para evitar interferência entre testes.
+5. **Cobertura**: Tente cobrir todos os caminhos de código, incluindo casos de erro e edge cases.
 
 ## Verificação de Saúde
 
@@ -179,30 +212,28 @@ GET /health
 
 ```
 backend/
-├── src/
+├── docs/                           # Documentação
+├── generate-api-yaml.js            # Gerador de YAML para API
+├── jest.config.js                  # Configuração do Jest
+├── knexfile.ts                     # Configuração do Knex
+├── logs/                           # Logs da aplicação
+├── migrations/                     # Migrações do banco de dados
+├── seeds/                          # Seeds para dados iniciais
+├── source/                         # Código fonte da aplicação
 │   ├── config/                     # Configurações da aplicação
 │   ├── controllers/                # Controladores (camada de apresentação)
 │   ├── middlewares/                # Middlewares do Express
 │   ├── domain/                     # Camada de domínio (regras de negócio)
-│   │   ├── entities/               # Entidades de domínio
-│   │   ├── interfaces/             # Interfaces e tipos
-│   │   └── dtos/                   # Objetos de transferência de dados
 │   ├── services/                   # Implementações de serviços (casos de uso)
 │   ├── repositories/               # Implementações de repositórios
 │   ├── validators/                 # Validadores de entrada
 │   ├── routes/                     # Rotas da API
 │   ├── utils/                      # Utilitários
-│   ├── di/                         # Injeção de dependências
 │   └── app.ts                      # Ponto de entrada da aplicação
-├── migrations/                     # Migrações do banco de dados
-├── seeds/                          # Seeds para dados iniciais
+├── swaggerDef.js                   # Definição do Swagger
 ├── tests/                          # Testes automatizados
 │   ├── unit/                       # Testes unitários
 │   ├── integration/                # Testes de integração
-│   └── e2e/                        # Testes end-to-end
-└── docs/                           # Documentação
+│   └── setup.ts                    # Configuração do ambiente de testes
+└── tsconfig.json                   # Configuração do TypeScript
 ```
-
-## Licença
-
-ISC
