@@ -1,179 +1,91 @@
-import dotenv from 'dotenv';
-import knex from 'knex';
-import path from 'path';
+import knex, { Knex } from 'knex';
 import { Model } from 'objection';
-import supertest from 'supertest';
-import app from '../source/app';
 import config from '../knexfile';
+import { logger } from '../source/utils/logger';
 
-// Load environment variables from .env.test if it exists, otherwise use .env
-dotenv.config({ path: path.resolve(__dirname, '../.env.test') });
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
+// Get the test configuration
+const testConfig = config.test;
 
-// Force test environment
-process.env.NODE_ENV = 'test';
-
-// Initialize knex with the test configuration from knexfile.ts
-const knexInstance = knex(config.test);
+// Create a knex instance for testing
+export const knexInstance: Knex = knex(testConfig);
 
 // Bind all Models to the knex instance
 Model.knex(knexInstance);
 
-// Create a supertest instance for making HTTP requests
-export const request = supertest(app);
-
-// Global afterAll hook to ensure all connections are closed
-afterAll(async () => {
-  try {
-    // Close the test database connection
-    if (knexInstance && typeof knexInstance.destroy === 'function') {
-      await knexInstance.destroy();
-    }
-
-    // Close the main application database connection
-    const { closeConnection } = require('../source/config/database');
-    await closeConnection();
-
-    // Reset the knex instance to ensure it's not reused
-    if (Model && typeof Model.knex === 'function') {
-      Model.knex(null as any);
-    }
-
-    // Add a small delay to allow any pending operations to complete
-    await new Promise(resolve => setTimeout(resolve, 100));
-  } catch (error) {
-    console.error('Error in global afterAll hook:', error);
-  }
-});
-
 /**
- * Setup function to run before tests
- * Runs migrations to create database schema
+ * Set up the test database
+ * This function should be called before running tests
  */
 export const setupTestDatabase = async (): Promise<void> => {
   try {
-    // Only proceed if knexInstance is valid
+    // First ensure the database is clean
+    await teardownTestDatabase();
+
+    // Run migrations to create tables
     if (knexInstance && typeof knexInstance.migrate?.latest === 'function') {
-      // Run migrations to create tables
       await knexInstance.migrate.latest();
+      logger.info('Test database migrations completed successfully');
     } else {
-      console.error('Cannot run migrations: knexInstance or migrate.latest is not available');
+      logger.error('Cannot run migrations: knexInstance or migrate.latest is not available');
     }
-  } catch (error) {
-    console.error('Error during database setup:', error);
-    throw error; // Re-throw to fail the test if setup fails
+  } catch (error: any) {
+    logger.error('Error setting up test database', {
+      error: error.message,
+      stack: error.stack
+    });
+    throw error;
   }
 };
 
 /**
- * Teardown function to run after tests
- * Rolls back migrations and cleans up the database
+ * Tear down the test database
+ * This function should be called after running tests
  */
 export const teardownTestDatabase = async (): Promise<void> => {
   try {
-    // Only proceed if knexInstance is valid
-    if (knexInstance && typeof knexInstance.raw === 'function') {
-      // Drop all tables to ensure a clean state
-      await knexInstance.raw('PRAGMA foreign_keys = OFF');
-      const tables = await knexInstance.raw("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'");
-
-      for (const table of tables) {
-        await knexInstance.schema.dropTableIfExists(table.name);
-      }
-
-      // Roll back migrations
-      if (typeof knexInstance.migrate?.rollback === 'function') {
-        await knexInstance.migrate.rollback(undefined, true);
-      }
+    // Roll back all migrations
+    if (knexInstance && typeof knexInstance.migrate?.rollback === 'function') {
+      await knexInstance.migrate.rollback(undefined, true);
+      logger.info('Test database migrations rolled back successfully');
+    } else {
+      logger.error('Cannot rollback migrations: knexInstance or migrate.rollback is not available');
     }
-  } catch (error) {
-    console.error('Error during database teardown:', error);
+  } catch (error: any) {
+    logger.error('Error tearing down test database', {
+      error: error.message,
+      stack: error.stack
+    });
+    throw error;
   }
-
-  // Note: We don't close connections here as that's handled by the global afterAll hook
 };
 
 /**
- * Helper function to get an authentication token for testing protected routes
- * @param login User login
- * @param senha User password
- * @returns JWT token
+ * Close the database connection
+ * This function should be called when tests are complete
  */
-export const getAuthToken = async (login: string = 'teste@exemplo.com', senha: string = 'senha123'): Promise<string> => {
-  const response = await request
-    .post('/api/auth/login')
-    .send({ login, senha });
-
-  return response.body.data.token;
-};
-
-/**
- * Helper function to create a test user
- * @param userData User data (optional, uses defaults if not provided)
- * @returns Created user data
- */
-export const createTestUser = async (userData?: { nome?: string; login?: string; senha?: string }): Promise<any> => {
-  const defaultUserData = {
-    nome: 'Usuário de Teste',
-    login: `teste-${Date.now()}@exemplo.com`,
-    senha: 'senha123',
-    ...userData
-  };
-
-  const response = await request
-    .post('/api/auth/register')
-    .send(defaultUserData);
-
-  return response.body.data;
-};
-
-/**
- * Helper function to create a test category
- * @param token Authentication token
- * @param nome Category name
- * @returns Created category data
- */
-export const createTestCategory = async (token: string, nome: string = `Categoria de Teste ${Date.now()}`): Promise<any> => {
-  const response = await request
-    .post('/api/categorias')
-    .set('Authorization', `Bearer ${token}`)
-    .send({ nome });
-
-  return response.body.data;
-};
-
-/**
- * Helper function to create a test recipe
- * @param token Authentication token
- * @param recipeData Recipe data (optional, uses defaults if not provided)
- * @returns Created recipe data
- */
-export const createTestRecipe = async (
-  token: string,
-  recipeData?: {
-    id_categorias?: number;
-    nome?: string;
-    tempo_preparo_minutos?: number;
-    porcoes?: number;
-    modo_preparo?: string;
-    ingredientes?: string;
+export const closeTestConnection = async (): Promise<void> => {
+  try {
+    if (knexInstance && typeof knexInstance.destroy === 'function') {
+      await knexInstance.destroy();
+      logger.info('Test database connection closed successfully');
+    } else {
+      logger.info('No active test database connection to close');
+    }
+  } catch (error: any) {
+    logger.error('Error closing test database connection', {
+      error: error.message,
+      stack: error.stack
+    });
+    throw error;
   }
-): Promise<any> => {
-  const defaultRecipeData = {
-    nome: `Receita de Teste ${Date.now()}`,
-    tempo_preparo_minutos: 30,
-    porcoes: 4,
-    modo_preparo: 'Modo de preparo de teste. Passo 1: Teste. Passo 2: Teste.',
-    ingredientes: '- Ingrediente 1\n- Ingrediente 2\n- Ingrediente 3',
-    ...recipeData
-  };
-
-  const response = await request
-    .post('/api/receitas')
-    .set('Authorization', `Bearer ${token}`)
-    .send(defaultRecipeData);
-
-  return response.body.data;
 };
 
-export { knexInstance as knex };
+// Setup global Jest hooks
+beforeAll(async () => {
+  await setupTestDatabase();
+});
+
+afterAll(async () => {
+  await teardownTestDatabase();
+  await closeTestConnection();
+});

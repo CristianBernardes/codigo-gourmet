@@ -2,7 +2,7 @@ import knex, { Knex } from 'knex';
 import { Model } from 'objection';
 import config from '../../knexfile';
 import { logger } from '../utils/logger';
-import { NODE_ENV, IS_TEST } from '../utils/constants';
+import { DB_HOST, DB_USER, DB_NAME, NODE_ENV, IS_TEST } from '../utils/constants';
 
 // Determine which environment we're in
 const environment = NODE_ENV;
@@ -12,9 +12,9 @@ let knexInstance: Knex;
 try {
   // Log database connection attempt
   logger.info(`Attempting to connect to database in ${environment} environment`, {
-    host: config[environment].connection.host,
-    database: config[environment].connection.database,
-    user: config[environment].connection.user
+    host: DB_HOST,
+    database: DB_NAME,
+    user: DB_USER
   });
 
   // Initialize knex with the appropriate configuration

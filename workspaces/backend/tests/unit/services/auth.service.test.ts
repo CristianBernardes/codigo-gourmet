@@ -2,195 +2,189 @@ import bcrypt from 'bcrypt';
 import { AuthService } from '../../../source/services/auth.service';
 import { IUsuarioRepository } from '../../../source/domain/interfaces/repositories/IUsuarioRepository';
 import { Usuario } from '../../../source/domain/entities/Usuario';
-
-// Mock the jwt module
-jest.mock('../../../source/config/jwt');
-
-// Import the mocked functions after mocking
 import { generateToken, verifyToken } from '../../../source/config/jwt';
 
-// Type the mocked functions
-const mockGenerateToken = generateToken as jest.MockedFunction<typeof generateToken>;
-const mockVerifyToken = verifyToken as jest.MockedFunction<typeof verifyToken>;
+// Mock bcrypt
+jest.mock('bcrypt');
+
+// Mock jwt functions
+jest.mock('../../../source/config/jwt', () => ({
+  generateToken: jest.fn().mockReturnValue('mocked-jwt-token'),
+  verifyToken: jest.fn()
+}));
 
 describe('AuthService', () => {
   let authService: AuthService;
   let mockUsuarioRepository: jest.Mocked<IUsuarioRepository>;
+  
+  // Mock user data
+  const mockUser: Usuario = {
+    id: 1,
+    nome: 'Test User',
+    login: 'test@example.com',
+    senha: 'hashed-password',
+    criado_em: new Date(),
+    atualizado_em: new Date()
+  };
 
   beforeEach(() => {
-    // Clear all mocks before each test
+    // Reset all mocks
     jest.clearAllMocks();
-
-    // Setup mock implementations AFTER clearing mocks
-    mockGenerateToken.mockReturnValue('mocked-token');
-    mockVerifyToken.mockImplementation((token) => {
-      if (token === 'valid-token') {
-        return { id: 1, login: 'teste@exemplo.com' };
-      }
-      return null;
-    });
-
-    // Create a mock for the usuario repository
+    
+    // Create mock for usuario repository
     mockUsuarioRepository = {
       findById: jest.fn(),
       findByLogin: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
-      findAll: jest.fn()
-    } as jest.Mocked<IUsuarioRepository>;
-
-    // Create an instance of the auth service with the mock repository
+      list: jest.fn()
+    };
+    
+    // Create service instance with mock repository
     authService = new AuthService(mockUsuarioRepository);
+    
+    // Setup bcrypt mock
+    (bcrypt.compare as jest.Mock).mockImplementation((plainText, hash) => {
+      return Promise.resolve(plainText === 'correct-password');
+    });
+    
+    (bcrypt.hash as jest.Mock).mockImplementation((plainText, saltRounds) => {
+      return Promise.resolve(`hashed-${plainText}`);
+    });
   });
-
+  
   describe('login', () => {
     it('should return user and token when credentials are valid', async () => {
       // Arrange
-      const mockUser: Usuario = {
-        id: 1,
-        nome: 'Usuário de Teste',
-        login: 'teste@exemplo.com',
-        senha: await bcrypt.hash('senha123', 10),
-        criado_em: new Date(),
-        alterado_em: new Date()
-      };
-
+      const loginData = { login: 'test@example.com', senha: 'correct-password' };
       mockUsuarioRepository.findByLogin.mockResolvedValue(mockUser);
-      jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
-
+      
       // Act
-      const result = await authService.login({ login: 'teste@exemplo.com', senha: 'senha123' });
-
+      const result = await authService.login(loginData);
+      
       // Assert
-      expect(mockUsuarioRepository.findByLogin).toHaveBeenCalledWith('teste@exemplo.com');
-      expect(bcrypt.compare).toHaveBeenCalledWith('senha123', mockUser.senha);
-      expect(mockGenerateToken).toHaveBeenCalledWith({ id: 1, login: 'teste@exemplo.com' });
+      expect(mockUsuarioRepository.findByLogin).toHaveBeenCalledWith(loginData.login);
+      expect(bcrypt.compare).toHaveBeenCalledWith(loginData.senha, mockUser.senha);
+      expect(generateToken).toHaveBeenCalledWith({ id: mockUser.id, login: mockUser.login });
+      
       expect(result).toEqual({
         usuario: {
-          id: 1,
-          nome: 'Usuário de Teste',
-          login: 'teste@exemplo.com',
+          id: mockUser.id,
+          nome: mockUser.nome,
+          login: mockUser.login,
           criado_em: mockUser.criado_em,
-          alterado_em: mockUser.alterado_em
+          atualizado_em: mockUser.atualizado_em
         },
-        token: 'mocked-token'
+        token: 'mocked-jwt-token'
       });
     });
-
-    it('should throw an error when user is not found', async () => {
+    
+    it('should throw error when user is not found', async () => {
       // Arrange
+      const loginData = { login: 'nonexistent@example.com', senha: 'any-password' };
       mockUsuarioRepository.findByLogin.mockResolvedValue(null);
-
+      
       // Act & Assert
-      await expect(authService.login({ login: 'inexistente@exemplo.com', senha: 'senha123' }))
-          .rejects.toThrow('Usuário não encontrado');
+      await expect(authService.login(loginData)).rejects.toThrow('Usuário não encontrado');
+      expect(mockUsuarioRepository.findByLogin).toHaveBeenCalledWith(loginData.login);
+      expect(bcrypt.compare).not.toHaveBeenCalled();
+      expect(generateToken).not.toHaveBeenCalled();
     });
-
-    it('should throw an error when password is incorrect', async () => {
+    
+    it('should throw error when password is incorrect', async () => {
       // Arrange
-      const mockUser: Usuario = {
-        id: 1,
-        nome: 'Usuário de Teste',
-        login: 'teste@exemplo.com',
-        senha: await bcrypt.hash('senha123', 10),
-        criado_em: new Date(),
-        alterado_em: new Date()
-      };
-
+      const loginData = { login: 'test@example.com', senha: 'wrong-password' };
       mockUsuarioRepository.findByLogin.mockResolvedValue(mockUser);
-      jest.spyOn(bcrypt, 'compare').mockResolvedValue(false as never);
-
+      
       // Act & Assert
-      await expect(authService.login({ login: 'teste@exemplo.com', senha: 'senha_errada' }))
-          .rejects.toThrow('Senha incorreta');
+      await expect(authService.login(loginData)).rejects.toThrow('Senha incorreta');
+      expect(mockUsuarioRepository.findByLogin).toHaveBeenCalledWith(loginData.login);
+      expect(bcrypt.compare).toHaveBeenCalledWith(loginData.senha, mockUser.senha);
+      expect(generateToken).not.toHaveBeenCalled();
     });
   });
-
+  
   describe('register', () => {
-    it('should create a new user and return user and token', async () => {
+    it('should create user and return user with token when registration is successful', async () => {
       // Arrange
-      const newUser: Usuario = {
-        nome: 'Novo Usuário',
-        login: 'novo@exemplo.com',
-        senha: 'senha123'
-      };
-
+      const registerData = { nome: 'New User', login: 'new@example.com', senha: 'new-password' };
       const createdUser: Usuario = {
         id: 2,
-        nome: 'Novo Usuário',
-        login: 'novo@exemplo.com',
-        senha: await bcrypt.hash('senha123', 10),
+        nome: registerData.nome,
+        login: registerData.login,
+        senha: `hashed-${registerData.senha}`,
         criado_em: new Date(),
-        alterado_em: new Date()
+        atualizado_em: new Date()
       };
-
+      
       mockUsuarioRepository.findByLogin.mockResolvedValue(null);
       mockUsuarioRepository.create.mockResolvedValue(createdUser);
-      jest.spyOn(bcrypt, 'hash').mockResolvedValue('hashed-password' as never);
-
+      
       // Act
-      const result = await authService.register(newUser);
-
+      const result = await authService.register(registerData);
+      
       // Assert
-      expect(mockUsuarioRepository.findByLogin).toHaveBeenCalledWith('novo@exemplo.com');
-      expect(bcrypt.hash).toHaveBeenCalledWith('senha123', 10);
+      expect(mockUsuarioRepository.findByLogin).toHaveBeenCalledWith(registerData.login);
+      expect(bcrypt.hash).toHaveBeenCalledWith(registerData.senha, expect.any(Number));
       expect(mockUsuarioRepository.create).toHaveBeenCalledWith({
-        nome: 'Novo Usuário',
-        login: 'novo@exemplo.com',
-        senha: 'hashed-password'
+        nome: registerData.nome,
+        login: registerData.login,
+        senha: `hashed-${registerData.senha}`
       });
-      expect(mockGenerateToken).toHaveBeenCalledWith({ id: 2, login: 'novo@exemplo.com' });
+      expect(generateToken).toHaveBeenCalledWith({ id: createdUser.id, login: createdUser.login });
+      
       expect(result).toEqual({
         usuario: {
-          id: 2,
-          nome: 'Novo Usuário',
-          login: 'novo@exemplo.com',
+          id: createdUser.id,
+          nome: createdUser.nome,
+          login: createdUser.login,
           criado_em: createdUser.criado_em,
-          alterado_em: createdUser.alterado_em
+          atualizado_em: createdUser.atualizado_em
         },
-        token: 'mocked-token'
+        token: 'mocked-jwt-token'
       });
     });
-
-    it('should throw an error when login already exists', async () => {
+    
+    it('should throw error when login is already in use', async () => {
       // Arrange
-      const existingUser: Usuario = {
-        id: 1,
-        nome: 'Usuário Existente',
-        login: 'existente@exemplo.com',
-        senha: 'senha-hash',
-        criado_em: new Date(),
-        alterado_em: new Date()
-      };
-
-      mockUsuarioRepository.findByLogin.mockResolvedValue(existingUser);
-
+      const registerData = { nome: 'New User', login: 'existing@example.com', senha: 'new-password' };
+      mockUsuarioRepository.findByLogin.mockResolvedValue(mockUser);
+      
       // Act & Assert
-      await expect(authService.register({
-        nome: 'Novo Usuário',
-        login: 'existente@exemplo.com',
-        senha: 'senha123'
-      })).rejects.toThrow('Este login já está em uso');
+      await expect(authService.register(registerData)).rejects.toThrow('Este login já está em uso');
+      expect(mockUsuarioRepository.findByLogin).toHaveBeenCalledWith(registerData.login);
+      expect(bcrypt.hash).not.toHaveBeenCalled();
+      expect(mockUsuarioRepository.create).not.toHaveBeenCalled();
+      expect(generateToken).not.toHaveBeenCalled();
     });
   });
-
+  
   describe('validateToken', () => {
-    it('should return user info when token is valid', async () => {
+    it('should return user data when token is valid', async () => {
+      // Arrange
+      const token = 'valid-token';
+      const decodedToken = { id: 1, login: 'test@example.com' };
+      (verifyToken as jest.Mock).mockReturnValue(decodedToken);
+      
       // Act
-      const result = await authService.validateToken('valid-token');
-
+      const result = await authService.validateToken(token);
+      
       // Assert
-      expect(mockVerifyToken).toHaveBeenCalledWith('valid-token');
-      expect(result).toEqual({ id: 1, login: 'teste@exemplo.com' });
+      expect(verifyToken).toHaveBeenCalledWith(token);
+      expect(result).toEqual(decodedToken);
     });
-
+    
     it('should return null when token is invalid', async () => {
+      // Arrange
+      const token = 'invalid-token';
+      (verifyToken as jest.Mock).mockReturnValue(null);
+      
       // Act
-      const result = await authService.validateToken('invalid-token');
-
+      const result = await authService.validateToken(token);
+      
       // Assert
-      expect(mockVerifyToken).toHaveBeenCalledWith('invalid-token');
+      expect(verifyToken).toHaveBeenCalledWith(token);
       expect(result).toBeNull();
     });
   });

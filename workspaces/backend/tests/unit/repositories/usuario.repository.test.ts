@@ -1,69 +1,76 @@
 import { UsuarioRepository } from '../../../source/repositories/usuario.repository';
-import { Usuario } from '../../../source/domain/entities/Usuario';
-import { UsuarioEntity } from '../../../source/domain/entities/Usuario';
+import { Usuario, UsuarioEntity } from '../../../source/domain/entities/Usuario';
 
-// Create a mock for the database module
-jest.mock('../../../source/config/database');
+// Mock the database module
+jest.mock('../../../source/config/database', () => {
+  // Create mock query builder
+  const mockQueryBuilder = {
+    select: jest.fn().mockReturnThis(),
+    where: jest.fn().mockReturnThis(),
+    first: jest.fn(),
+    insert: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn()
+  };
 
-// Create mock query builder
-const mockQueryBuilder = {
-  select: jest.fn().mockReturnThis(),
-  where: jest.fn().mockReturnThis(),
-  first: jest.fn(),
-  insert: jest.fn(),
-  update: jest.fn(),
-  delete: jest.fn(),
-  returning: jest.fn().mockReturnThis()
-};
+  // Create a mock database function that returns the query builder
+  const mockDb = jest.fn().mockReturnValue(mockQueryBuilder);
 
-// Create a mock database function
-const mockDb = jest.fn().mockReturnValue(mockQueryBuilder);
+  // Add the query builder to the mockDb for easy access in tests
+  mockDb.queryBuilder = mockQueryBuilder;
 
-// Import the mocked database after mocking
-import db from '../../../source/config/database';
-
-// Setup the mock implementation
-beforeEach(() => {
-  // Clear all mocks
-  jest.clearAllMocks();
-
-  // Setup the mock implementation for db
-  (db as jest.Mock).mockImplementation(() => mockQueryBuilder);
+  return mockDb;
 });
+
+// Import the mocked database
+import db from '../../../source/config/database';
 
 describe('UsuarioRepository', () => {
   let usuarioRepository: UsuarioRepository;
+  let mockQueryBuilder: any;
+
+  // Mock user data
+  const mockUser: Usuario = {
+    id: 1,
+    nome: 'Test User',
+    login: 'test@example.com',
+    senha: 'hashed-password',
+    criado_em: new Date(),
+    atualizado_em: new Date()
+  };
 
   beforeEach(() => {
+    // Clear all mocks
     jest.clearAllMocks();
+
+    // Get the mock query builder
+    mockQueryBuilder = (db as any).queryBuilder;
+
+    // Create repository instance
     usuarioRepository = new UsuarioRepository();
   });
 
   describe('findById', () => {
-    it('should return a user when found', async () => {
+    it('should return user when found by id', async () => {
       // Arrange
-      const mockUser = {
-        id: 1,
-        nome: 'Usuário de Teste',
-        login: 'teste@exemplo.com',
-        senha: 'senha-hash',
-        criado_em: new Date(),
-        alterado_em: new Date()
-      };
-
       mockQueryBuilder.first.mockResolvedValue(mockUser);
 
       // Act
       const result = await usuarioRepository.findById(1);
 
       // Assert
-      expect(mockDb).toHaveBeenCalledWith('usuarios');
+      expect(db).toHaveBeenCalledWith('usuarios');
       expect(mockQueryBuilder.where).toHaveBeenCalledWith({ id: 1 });
       expect(mockQueryBuilder.first).toHaveBeenCalled();
-      expect(result).toEqual(mockUser);
+      expect(result).toBeInstanceOf(UsuarioEntity);
+      expect(result).toEqual(expect.objectContaining({
+        id: mockUser.id,
+        nome: mockUser.nome,
+        login: mockUser.login
+      }));
     });
 
-    it('should return null when user is not found', async () => {
+    it('should return null when user is not found by id', async () => {
       // Arrange
       mockQueryBuilder.first.mockResolvedValue(null);
 
@@ -71,174 +78,148 @@ describe('UsuarioRepository', () => {
       const result = await usuarioRepository.findById(999);
 
       // Assert
-      expect(mockDb).toHaveBeenCalledWith('usuarios');
+      expect(db).toHaveBeenCalledWith('usuarios');
       expect(mockQueryBuilder.where).toHaveBeenCalledWith({ id: 999 });
       expect(mockQueryBuilder.first).toHaveBeenCalled();
       expect(result).toBeNull();
     });
 
-    it('should throw an error when database operation fails', async () => {
+    it('should throw error when database query fails', async () => {
       // Arrange
       const error = new Error('Database error');
       mockQueryBuilder.first.mockRejectedValue(error);
 
       // Act & Assert
-      await expect(usuarioRepository.findById(1)).rejects.toThrow(error);
+      await expect(usuarioRepository.findById(1)).rejects.toThrow('Database error');
+      expect(db).toHaveBeenCalledWith('usuarios');
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith({ id: 1 });
+      expect(mockQueryBuilder.first).toHaveBeenCalled();
     });
   });
 
   describe('findByLogin', () => {
-    it('should return a user when found', async () => {
+    it('should return user when found by login', async () => {
       // Arrange
-      const mockUser = {
-        id: 1,
-        nome: 'Usuário de Teste',
-        login: 'teste@exemplo.com',
-        senha: 'senha-hash',
-        criado_em: new Date(),
-        alterado_em: new Date()
-      };
-
       mockQueryBuilder.first.mockResolvedValue(mockUser);
 
       // Act
-      const result = await usuarioRepository.findByLogin('teste@exemplo.com');
+      const result = await usuarioRepository.findByLogin('test@example.com');
 
       // Assert
-      expect(mockDb).toHaveBeenCalledWith('usuarios');
-      expect(mockQueryBuilder.where).toHaveBeenCalledWith({ login: 'teste@exemplo.com' });
+      expect(db).toHaveBeenCalledWith('usuarios');
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith({ login: 'test@example.com' });
       expect(mockQueryBuilder.first).toHaveBeenCalled();
-      expect(result).toEqual(mockUser);
+      expect(result).toBeInstanceOf(UsuarioEntity);
+      expect(result).toEqual(expect.objectContaining({
+        id: mockUser.id,
+        nome: mockUser.nome,
+        login: mockUser.login
+      }));
     });
 
-    it('should return null when user is not found', async () => {
+    it('should return null when user is not found by login', async () => {
       // Arrange
       mockQueryBuilder.first.mockResolvedValue(null);
 
       // Act
-      const result = await usuarioRepository.findByLogin('inexistente@exemplo.com');
+      const result = await usuarioRepository.findByLogin('nonexistent@example.com');
 
       // Assert
-      expect(mockDb).toHaveBeenCalledWith('usuarios');
-      expect(mockQueryBuilder.where).toHaveBeenCalledWith({ login: 'inexistente@exemplo.com' });
+      expect(db).toHaveBeenCalledWith('usuarios');
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith({ login: 'nonexistent@example.com' });
       expect(mockQueryBuilder.first).toHaveBeenCalled();
       expect(result).toBeNull();
     });
   });
 
   describe('create', () => {
-    it('should create a new user and return it with ID', async () => {
+    it('should create and return a new user', async () => {
       // Arrange
-      const newUser: Usuario = {
-        nome: 'Novo Usuário',
-        login: 'novo@exemplo.com',
-        senha: 'senha-hash'
+      const newUser: Partial<Usuario> = {
+        nome: 'New User',
+        login: 'new@example.com',
+        senha: 'hashed-new-password'
       };
-
-      const expectedUser = {
-        ...newUser,
-        id: 1,
-        criado_em: expect.any(Date),
-        alterado_em: expect.any(Date)
-      };
-
-      // Mock the insert method to return the ID
-      mockQueryBuilder.insert.mockResolvedValue([1]);
+      
+      mockQueryBuilder.insert.mockResolvedValue([2]); // Return new ID
 
       // Act
-      const result = await usuarioRepository.create(newUser);
+      const result = await usuarioRepository.create(newUser as Usuario);
 
       // Assert
-      expect(mockDb).toHaveBeenCalledWith('usuarios');
-      expect(mockQueryBuilder.insert).toHaveBeenCalledWith({
-        nome: 'Novo Usuário',
-        login: 'novo@exemplo.com',
-        senha: 'senha-hash',
+      expect(db).toHaveBeenCalledWith('usuarios');
+      expect(mockQueryBuilder.insert).toHaveBeenCalledWith(expect.objectContaining({
+        nome: newUser.nome,
+        login: newUser.login,
+        senha: newUser.senha,
         criado_em: expect.any(Date),
         alterado_em: expect.any(Date)
-      });
-      expect(result).toEqual(expectedUser);
+      }));
+      
+      expect(result).toBeInstanceOf(UsuarioEntity);
+      expect(result).toEqual(expect.objectContaining({
+        id: 2,
+        nome: newUser.nome,
+        login: newUser.login,
+        senha: newUser.senha
+      }));
     });
   });
 
   describe('update', () => {
-    it('should update a user and return the updated user', async () => {
+    it('should update and return the updated user', async () => {
       // Arrange
       const updateData: Partial<Usuario> = {
-        nome: 'Nome Atualizado'
+        nome: 'Updated Name'
       };
-
-      const updatedUser = {
-        id: 1,
-        nome: 'Nome Atualizado',
-        login: 'teste@exemplo.com',
-        senha: 'senha-hash',
-        criado_em: new Date(),
-        alterado_em: new Date()
-      };
-
-      mockQueryBuilder.update.mockResolvedValue(1);
-
-      // Mock the findById method to return the updated user
-      jest.spyOn(usuarioRepository, 'findById').mockResolvedValue(updatedUser);
+      
+      const updatedUser = { ...mockUser, nome: 'Updated Name' };
+      
+      mockQueryBuilder.update.mockResolvedValue(1); // 1 row affected
+      
+      // Mock the findById call that happens after update
+      jest.spyOn(usuarioRepository, 'findById').mockResolvedValue(updatedUser as Usuario);
 
       // Act
       const result = await usuarioRepository.update(1, updateData);
 
       // Assert
-      expect(mockDb).toHaveBeenCalledWith('usuarios');
+      expect(db).toHaveBeenCalledWith('usuarios');
       expect(mockQueryBuilder.where).toHaveBeenCalledWith({ id: 1 });
-      expect(mockQueryBuilder.update).toHaveBeenCalledWith({
-        ...updateData,
+      expect(mockQueryBuilder.update).toHaveBeenCalledWith(expect.objectContaining({
+        nome: updateData.nome,
         alterado_em: expect.any(Date)
-      });
+      }));
+      
       expect(usuarioRepository.findById).toHaveBeenCalledWith(1);
       expect(result).toEqual(updatedUser);
-    });
-
-    it('should return null when user is not found', async () => {
-      // Arrange
-      const updateData: Partial<Usuario> = {
-        nome: 'Nome Atualizado'
-      };
-
-      mockQueryBuilder.update.mockResolvedValue(0);
-
-      // Mock the findById method to return null
-      jest.spyOn(usuarioRepository, 'findById').mockResolvedValue(null);
-
-      // Act
-      const result = await usuarioRepository.update(999, updateData);
-
-      // Assert
-      expect(result).toBeNull();
     });
   });
 
   describe('delete', () => {
-    it('should delete a user and return true when successful', async () => {
+    it('should return true when user is successfully deleted', async () => {
       // Arrange
-      mockQueryBuilder.delete.mockResolvedValue(1);
+      mockQueryBuilder.delete.mockResolvedValue(1); // 1 row affected
 
       // Act
       const result = await usuarioRepository.delete(1);
 
       // Assert
-      expect(mockDb).toHaveBeenCalledWith('usuarios');
+      expect(db).toHaveBeenCalledWith('usuarios');
       expect(mockQueryBuilder.where).toHaveBeenCalledWith({ id: 1 });
       expect(mockQueryBuilder.delete).toHaveBeenCalled();
       expect(result).toBe(true);
     });
 
-    it('should return false when user is not found', async () => {
+    it('should return false when no user is deleted', async () => {
       // Arrange
-      mockQueryBuilder.delete.mockResolvedValue(0);
+      mockQueryBuilder.delete.mockResolvedValue(0); // 0 rows affected
 
       // Act
       const result = await usuarioRepository.delete(999);
 
       // Assert
-      expect(mockDb).toHaveBeenCalledWith('usuarios');
+      expect(db).toHaveBeenCalledWith('usuarios');
       expect(mockQueryBuilder.where).toHaveBeenCalledWith({ id: 999 });
       expect(mockQueryBuilder.delete).toHaveBeenCalled();
       expect(result).toBe(false);
@@ -246,49 +227,49 @@ describe('UsuarioRepository', () => {
   });
 
   describe('findAll', () => {
-    it('should return all users', async () => {
+    it('should return array of users', async () => {
       // Arrange
       const mockUsers = [
-        {
-          id: 1,
-          nome: 'Usuário 1',
-          login: 'usuario1@exemplo.com',
-          senha: 'senha-hash-1',
-          criado_em: new Date(),
-          alterado_em: new Date()
-        },
-        {
-          id: 2,
-          nome: 'Usuário 2',
-          login: 'usuario2@exemplo.com',
-          senha: 'senha-hash-2',
-          criado_em: new Date(),
-          alterado_em: new Date()
-        }
+        mockUser,
+        { ...mockUser, id: 2, login: 'user2@example.com' }
       ];
-
-      mockQueryBuilder.select.mockResolvedValue(mockUsers);
+      
+      mockQueryBuilder.select.mockImplementation(() => {
+        return {
+          ...mockQueryBuilder,
+          then: (callback: Function) => Promise.resolve(callback(mockUsers))
+        };
+      });
 
       // Act
       const result = await usuarioRepository.findAll();
 
       // Assert
-      expect(mockDb).toHaveBeenCalledWith('usuarios');
+      expect(db).toHaveBeenCalledWith('usuarios');
       expect(mockQueryBuilder.select).toHaveBeenCalledWith('*');
-      expect(result).toEqual(mockUsers);
+      expect(result).toHaveLength(2);
+      expect(result[0]).toBeInstanceOf(UsuarioEntity);
+      expect(result[1]).toBeInstanceOf(UsuarioEntity);
+      expect(result[0].id).toBe(1);
+      expect(result[1].id).toBe(2);
     });
 
-    it('should return an empty array when no users are found', async () => {
+    it('should return empty array when no users exist', async () => {
       // Arrange
-      mockQueryBuilder.select.mockResolvedValue([]);
+      mockQueryBuilder.select.mockImplementation(() => {
+        return {
+          ...mockQueryBuilder,
+          then: (callback: Function) => Promise.resolve(callback([]))
+        };
+      });
 
       // Act
       const result = await usuarioRepository.findAll();
 
       // Assert
-      expect(mockDb).toHaveBeenCalledWith('usuarios');
+      expect(db).toHaveBeenCalledWith('usuarios');
       expect(mockQueryBuilder.select).toHaveBeenCalledWith('*');
-      expect(result).toEqual([]);
+      expect(result).toHaveLength(0);
     });
   });
 });

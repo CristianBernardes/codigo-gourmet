@@ -53,9 +53,13 @@ const config: { [key: string]: Knex.Config } = {
   },
 
   test: {
-    client: 'sqlite3',
+    client: 'mysql2',
     connection: {
-      filename: ':memory:',
+      host: DB_HOST,
+      port: DB_PORT,
+      user: DB_USER,
+      password: DB_PASSWORD,
+      database: `${DB_NAME}_test`,
     },
     migrations: {
       directory: path.join(__dirname, 'migrations'),
@@ -64,7 +68,10 @@ const config: { [key: string]: Knex.Config } = {
     seeds: {
       directory: path.join(__dirname, 'seeds'),
     },
-    useNullAsDefault: true,
+    pool: {
+      min: 2,
+      max: 10,
+    },
     debug: false,
   },
 };

@@ -1,0 +1,278 @@
+ npm test
+
+> backend@1.0.0 test
+> jest --forceExit --detectOpenHandles
+
+ts-jest[config] (WARN)
+    The "ts-jest" config option "isolatedModules" is deprecated and will be removed in v30.0.0. Please use "isolatedModules: true" in /home/cristian/projetos/codigo-gourmet/workspaces/backend/tsconfig.json instead, see https://www.typescriptlang.org/tsconfig/#isolatedModules
+
+POST /api/auth/register 201 65.494 ms - 358
+POST /api/auth/register 201 52.406 ms - 372
+POST /api/auth/register 409 3.321 ms - 58
+POST /api/auth/register 400 7.280 ms - 114
+POST /api/auth/register 201 57.120 ms - 378
+POST /api/auth/login 200 46.778 ms - 378
+POST /api/auth/register 409 3.263 ms - 58
+POST /api/auth/login 401 47.332 ms - 53
+POST /api/auth/register 409 3.070 ms - 58
+POST /api/auth/login 401 3.536 ms - 53
+POST /api/auth/register 201 51.720 ms - 418
+GET /api/auth/me 200 1.985 ms - 85
+POST /api/auth/register 201 54.602 ms - 418
+GET /api/auth/me 401 0.343 ms - 69
+POST /api/auth/register 201 52.285 ms - 418
+GET /api/auth/me 401 0.708 ms - 58
+ PASS  tests/integration/api/auth.test.ts
+  ● Console
+
+    console.error
+      [2025-06-12T16:36:11.095Z] [ERROR] [App] Error handling request: Erro de validação {
+        "url": "/api/auth/register",
+        "method": "POST",
+        "ip": "::ffff:127.0.0.1",
+        "stack": "Error: Erro de validação\n    at /home/cristian/projetos/codigo-gourmet/workspaces/backend/source/middlewares/validation.middleware.ts:42:17\n    at Layer.handleRequest (/home/cristian/projetos/codigo-gourmet/workspaces/backend/node_modules/router/lib/layer.js:152:17)\n    at next (/home/cristian/projetos/codigo-gourmet/workspaces/backend/node_modules/router/lib/route.js:157:13)\n    at /home/cristian/projetos/codigo-gourmet/workspaces/backend/node_modules/express-rate-limit/dist/index.cjs:822:7\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at /home/cristian/projetos/codigo-gourmet/workspaces/backend/node_modules/express-rate-limit/dist/index.cjs:704:5",
+        "name": "Error",
+        "message": "Erro de validação",
+        "statusCode": 400,
+        "isOperational": true,
+        "validationErrors": {
+          "senha": "Senha deve conter apenas letras e números"
+        }
+      }
+
+      76 |     // Always log errors
+      77 |     const formattedMessage = this.formatMessage(LogLevel.ERROR, message, meta);
+    > 78 |     console.error(formattedMessage);
+         |             ^
+      79 |
+      80 |     // Write to error log file
+      81 |     this.writeToFile(errorLogPath, formattedMessage);
+
+      at Logger.error (source/utils/logger.ts:78:13)
+      at errorMiddleware (source/middlewares/error.middleware.ts:71:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at next (node_modules/router/lib/route.js:155:13)
+      at source/middlewares/validation.middleware.ts:42:12
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at node_modules/express-rate-limit/dist/index.cjs:822:7
+      at node_modules/express-rate-limit/dist/index.cjs:704:5
+
+    console.error
+      [2025-06-12T16:36:11.276Z] [ERROR] [App] Error handling request: Credenciais inválidas {
+        "url": "/api/auth/login",
+        "method": "POST",
+        "ip": "::ffff:127.0.0.1",
+        "stack": "Error: Credenciais inválidas\n    at AuthController.<anonymous> (/home/cristian/projetos/codigo-gourmet/workspaces/backend/source/controllers/auth.controller.ts:23:23)\n    at Generator.throw (<anonymous>)\n    at rejected (/home/cristian/projetos/codigo-gourmet/workspaces/backend/source/controllers/auth.controller.ts:6:65)",
+        "name": "Error",
+        "message": "Credenciais inválidas",
+        "statusCode": 401,
+        "isOperational": true
+      }
+
+      76 |     // Always log errors
+      77 |     const formattedMessage = this.formatMessage(LogLevel.ERROR, message, meta);
+    > 78 |     console.error(formattedMessage);
+         |             ^
+      79 |
+      80 |     // Write to error log file
+      81 |     this.writeToFile(errorLogPath, formattedMessage);
+
+      at Logger.error (source/utils/logger.ts:78:13)
+      at errorMiddleware (source/middlewares/error.middleware.ts:71:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+      at AuthController.<anonymous> (source/controllers/auth.controller.ts:23:18)
+          at Generator.throw (<anonymous>)
+      at rejected (source/controllers/auth.controller.ts:6:65)
+
+    console.error
+      [2025-06-12T16:36:11.294Z] [ERROR] [App] Error handling request: Credenciais inválidas {
+        "url": "/api/auth/login",
+        "method": "POST",
+        "ip": "::ffff:127.0.0.1",
+        "stack": "Error: Credenciais inválidas\n    at AuthController.<anonymous> (/home/cristian/projetos/codigo-gourmet/workspaces/backend/source/controllers/auth.controller.ts:23:23)\n    at Generator.throw (<anonymous>)\n    at rejected (/home/cristian/projetos/codigo-gourmet/workspaces/backend/source/controllers/auth.controller.ts:6:65)\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)",
+        "name": "Error",
+        "message": "Credenciais inválidas",
+        "statusCode": 401,
+        "isOperational": true
+      }
+
+      76 |     // Always log errors
+      77 |     const formattedMessage = this.formatMessage(LogLevel.ERROR, message, meta);
+    > 78 |     console.error(formattedMessage);
+         |             ^
+      79 |
+      80 |     // Write to error log file
+      81 |     this.writeToFile(errorLogPath, formattedMessage);
+
+      at Logger.error (source/utils/logger.ts:78:13)
+      at errorMiddleware (source/middlewares/error.middleware.ts:71:10)
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+      at AuthController.<anonymous> (source/controllers/auth.controller.ts:23:18)
+          at Generator.throw (<anonymous>)
+      at rejected (source/controllers/auth.controller.ts:6:65)
+
+ PASS  tests/unit/services/auth.service.test.ts
+ PASS  tests/unit/repositories/usuario.repository.test.ts
+  ● Console
+
+    console.error
+      Error in findById: Error: Database error
+          at /home/cristian/projetos/codigo-gourmet/workspaces/backend/tests/unit/repositories/usuario.repository.test.ts:89:21
+          at Generator.next (<anonymous>)
+          at /home/cristian/projetos/codigo-gourmet/workspaces/backend/tests/unit/repositories/usuario.repository.test.ts:8:71
+          at new Promise (<anonymous>)
+          at Object.<anonymous>.__awaiter (/home/cristian/projetos/codigo-gourmet/workspaces/backend/tests/unit/repositories/usuario.repository.test.ts:4:12)
+          at Object.<anonymous> (/home/cristian/projetos/codigo-gourmet/workspaces/backend/tests/unit/repositories/usuario.repository.test.ts:87:67)
+          at Promise.then.completed (/home/cristian/projetos/codigo-gourmet/workspaces/backend/node_modules/jest-circus/build/utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/home/cristian/projetos/codigo-gourmet/workspaces/backend/node_modules/jest-circus/build/utils.js:231:10)
+          at _callCircusTest (/home/cristian/projetos/codigo-gourmet/workspaces/backend/node_modules/jest-circus/build/run.js:316:40)
+          at processTicksAndRejections (node:internal/process/task_queues:95:5)
+          at _runTest (/home/cristian/projetos/codigo-gourmet/workspaces/backend/node_modules/jest-circus/build/run.js:252:3)
+          at _runTestsForDescribeBlock (/home/cristian/projetos/codigo-gourmet/workspaces/backend/node_modules/jest-circus/build/run.js:126:9)
+          at _runTestsForDescribeBlock (/home/cristian/projetos/codigo-gourmet/workspaces/backend/node_modules/jest-circus/build/run.js:121:9)
+          at _runTestsForDescribeBlock (/home/cristian/projetos/codigo-gourmet/workspaces/backend/node_modules/jest-circus/build/run.js:121:9)
+          at run (/home/cristian/projetos/codigo-gourmet/workspaces/backend/node_modules/jest-circus/build/run.js:71:3)
+          at runAndTransformResultsToJestFormat (/home/cristian/projetos/codigo-gourmet/workspaces/backend/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+          at jestAdapter (/home/cristian/projetos/codigo-gourmet/workspaces/backend/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+          at runTestInternal (/home/cristian/projetos/codigo-gourmet/workspaces/backend/node_modules/jest-runner/build/runTest.js:367:16)
+          at runTest (/home/cristian/projetos/codigo-gourmet/workspaces/backend/node_modules/jest-runner/build/runTest.js:444:34)
+
+      14 |       return usuario ? new UsuarioEntity(usuario) : null;
+      15 |     } catch (error) {
+    > 16 |       console.error('Error in findById:', error);
+         |               ^
+      17 |       throw error;
+      18 |     }
+      19 |   }
+
+      at UsuarioRepository.<anonymous> (source/repositories/usuario.repository.ts:16:15)
+          at Generator.throw (<anonymous>)
+      at rejected (source/repositories/usuario.repository.ts:6:65)
+
+ PASS  tests/unit/controllers/auth.controller.test.ts
+ FAIL  tests/unit/middlewares/auth.middleware.test.ts
+  ● Auth Middleware › authMiddleware › should return 401 when authorization header is missing
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    - Expected
+    + Received
+
+      Object {
+        "message": "Token de autenticação não fornecido",
+    +   "status": "error",
+      },
+
+    Number of calls: 1
+
+      71 |       expect(nextFunction).not.toHaveBeenCalled();
+      72 |       expect(mockResponse.status).toHaveBeenCalledWith(401);
+    > 73 |       expect(mockResponse.json).toHaveBeenCalledWith({
+         |                                 ^
+      74 |         message: 'Token de autenticação não fornecido'
+      75 |       });
+      76 |     });
+
+      at Object.<anonymous> (tests/unit/middlewares/auth.middleware.test.ts:73:33)
+
+  ● Auth Middleware › authMiddleware › should return 401 when token format is invalid
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    - Expected
+    + Received
+
+      Object {
+        "message": "Token mal formatado",
+    +   "status": "error",
+      },
+
+    Number of calls: 1
+
+      93 |       expect(nextFunction).not.toHaveBeenCalled();
+      94 |       expect(mockResponse.status).toHaveBeenCalledWith(401);
+    > 95 |       expect(mockResponse.json).toHaveBeenCalledWith({
+         |                                 ^
+      96 |         message: 'Token mal formatado'
+      97 |       });
+      98 |     });
+
+      at Object.<anonymous> (tests/unit/middlewares/auth.middleware.test.ts:95:33)
+
+  ● Auth Middleware › authMiddleware › should return 401 when token is invalid
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    - Expected
+    + Received
+
+      Object {
+        "message": "Token inválido ou expirado",
+    +   "status": "error",
+      },
+
+    Number of calls: 1
+
+      116 |       expect(nextFunction).not.toHaveBeenCalled();
+      117 |       expect(mockResponse.status).toHaveBeenCalledWith(401);
+    > 118 |       expect(mockResponse.json).toHaveBeenCalledWith({
+          |                                 ^
+      119 |         message: 'Token inválido ou expirado'
+      120 |       });
+      121 |     });
+
+      at Object.<anonymous> (tests/unit/middlewares/auth.middleware.test.ts:118:33)
+
+  ● Auth Middleware › authMiddleware › should return 500 when an error occurs
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    - Expected
+    + Received
+
+      Object {
+        "message": "Erro ao autenticar usuário",
+    +   "status": "error",
+      },
+
+    Number of calls: 1
+
+      141 |       expect(nextFunction).not.toHaveBeenCalled();
+      142 |       expect(mockResponse.status).toHaveBeenCalledWith(500);
+    > 143 |       expect(mockResponse.json).toHaveBeenCalledWith({
+          |                                 ^
+      144 |         message: 'Erro ao autenticar usuário'
+      145 |       });
+      146 |     });
+
+      at Object.<anonymous> (tests/unit/middlewares/auth.middleware.test.ts:143:33)
+
+Test Suites: 1 failed, 4 passed, 5 total
+Tests:       4 failed, 39 passed, 43 total
+Snapshots:   0 total
+Time:        4.747 s
+Ran all test suites.
