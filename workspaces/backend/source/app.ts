@@ -17,7 +17,11 @@ import './config/database';
 const app = appConfig;
 
 // Initialize Swagger
-const swaggerSpec = swaggerJSDoc(swaggerDefinition);
+const options = {
+  definition: swaggerDefinition,
+  apis: swaggerDefinition.apis
+};
+const swaggerSpec = swaggerJSDoc(options);
 
 // Serve Swagger documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {

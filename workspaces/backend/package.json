@@ -15,7 +15,7 @@
     "migrate": "ts-node --transpile-only ./node_modules/.bin/knex migrate:latest",
     "migrate:rollback": "ts-node --transpile-only ./node_modules/.bin/knex migrate:rollback",
     "seed": "ts-node --transpile-only ./node_modules/.bin/knex seed:run",
-    "docs": "swagger-jsdoc -d swaggerDef.js -o docs/api.yaml",
+    "docs": "node generate-api-yaml.js",
     "prepare": "husky install"
   },
   "keywords": [],
