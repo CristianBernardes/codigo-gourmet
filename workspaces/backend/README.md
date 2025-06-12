@@ -176,9 +176,6 @@ O arquivo `setup.ts` contém funções para inicializar e limpar o banco de dado
 # Executar todos os testes
 npm test
 
-# Executar testes com watch mode
-npm run test:watch
-
 # Executar testes com cobertura
 npm run test:coverage
 
