@@ -75,7 +75,11 @@ class Logger {
   error(message: string, meta?: any): void {
     // Always log errors
     const formattedMessage = this.formatMessage(LogLevel.ERROR, message, meta);
-    console.error(formattedMessage);
+
+    // Don't log errors to console in test environment
+    if (!IS_TEST) {
+      console.error(formattedMessage);
+    }
 
     // Write to error log file
     this.writeToFile(errorLogPath, formattedMessage);
