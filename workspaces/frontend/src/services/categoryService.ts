@@ -1,5 +1,5 @@
 import api from './api';
-import type { Category, PaginatedResponse, ApiResponse } from '../types/models';
+import type { Category, ApiResponse } from '../types/models';
 
 /**
  * Service for category-related API calls
