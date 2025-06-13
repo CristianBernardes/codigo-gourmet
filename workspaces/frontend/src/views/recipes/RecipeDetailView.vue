@@ -21,17 +21,17 @@ onMounted(async () => {
     isLoading.value = false;
     return;
   }
-  
+
   await loadRecipe(recipeId);
 });
 
 const loadRecipe = async (recipeId: number) => {
   isLoading.value = true;
   error.value = '';
-  
+
   try {
     await recipeStore.fetchRecipeById(recipeId);
-    
+
     if (recipeStore.currentRecipe?.ingredientes) {
       // Parse ingredients from string to array
       ingredientsList.value = recipeStore.currentRecipe.ingredientes
@@ -58,7 +58,7 @@ const goToEdit = () => {
 
 const confirmDelete = async () => {
   if (!recipeStore.currentRecipe) return;
-  
+
   if (confirm('Tem certeza que deseja excluir esta receita?')) {
     try {
       await recipeStore.deleteRecipe(recipeStore.currentRecipe.id);
@@ -91,7 +91,7 @@ const printRecipe = () => {
             {{ recipeStore.currentRecipe.nome }}
           </h1>
         </div>
-        
+
         <div v-if="error" class="rounded-md bg-red-50 p-4 mb-4">
           <div class="flex">
             <div class="ml-3">
@@ -99,11 +99,11 @@ const printRecipe = () => {
             </div>
           </div>
         </div>
-        
+
         <div v-if="isLoading" class="flex justify-center items-center h-64">
           <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-red"></div>
         </div>
-        
+
         <div v-else-if="recipeStore.currentRecipe" class="bg-white shadow overflow-hidden sm:rounded-lg">
           <!-- Recipe Header -->
           <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
@@ -127,7 +127,7 @@ const printRecipe = () => {
               </template>
             </div>
           </div>
-          
+
           <!-- Recipe Info -->
           <div class="border-t border-gray-200">
             <dl>
@@ -187,19 +187,45 @@ const printRecipe = () => {
 @media print {
   body {
     background-color: white;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
   }
-  
+
   .bg-light-gray, .bg-white, .bg-gray-50 {
     background-color: white !important;
   }
-  
+
   .shadow, .sm\:rounded-lg {
     box-shadow: none !important;
     border-radius: 0 !important;
   }
-  
+
   .print\:hidden {
     display: none !important;
+  }
+
+  /* Prevent extra blank pages */
+  html, body {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Ensure content fits on page */
+  .min-h-screen {
+    min-height: auto !important;
+  }
+
+  /* Avoid page breaks inside elements */
+  dl, dt, dd, li {
+    page-break-inside: avoid;
+  }
+
+  /* Set explicit size for print */
+  @page {
+    size: auto;
+    margin: 0.5cm;
   }
 }
 </style>
