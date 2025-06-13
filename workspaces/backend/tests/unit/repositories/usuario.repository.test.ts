@@ -1,6 +1,16 @@
 import { UsuarioRepository } from '../../../source/repositories/usuario.repository';
 import { Usuario, UsuarioEntity } from '../../../source/domain/entities/Usuario';
 
+// Mock console.error to prevent error messages in test output
+const originalConsoleError = console.error;
+beforeAll(() => {
+  console.error = jest.fn();
+});
+
+afterAll(() => {
+  console.error = originalConsoleError;
+});
+
 // Mock the database module
 jest.mock('../../../source/config/database', () => {
   // Create mock query builder
@@ -140,7 +150,7 @@ describe('UsuarioRepository', () => {
         login: 'new@example.com',
         senha: 'hashed-new-password'
       };
-      
+
       mockQueryBuilder.insert.mockResolvedValue([2]); // Return new ID
 
       // Act
@@ -155,7 +165,7 @@ describe('UsuarioRepository', () => {
         criado_em: expect.any(Date),
         alterado_em: expect.any(Date)
       }));
-      
+
       expect(result).toBeInstanceOf(UsuarioEntity);
       expect(result).toEqual(expect.objectContaining({
         id: 2,
@@ -172,11 +182,11 @@ describe('UsuarioRepository', () => {
       const updateData: Partial<Usuario> = {
         nome: 'Updated Name'
       };
-      
+
       const updatedUser = { ...mockUser, nome: 'Updated Name' };
-      
+
       mockQueryBuilder.update.mockResolvedValue(1); // 1 row affected
-      
+
       // Mock the findById call that happens after update
       jest.spyOn(usuarioRepository, 'findById').mockResolvedValue(updatedUser as Usuario);
 
@@ -190,7 +200,7 @@ describe('UsuarioRepository', () => {
         nome: updateData.nome,
         alterado_em: expect.any(Date)
       }));
-      
+
       expect(usuarioRepository.findById).toHaveBeenCalledWith(1);
       expect(result).toEqual(updatedUser);
     });
@@ -233,7 +243,7 @@ describe('UsuarioRepository', () => {
         mockUser,
         { ...mockUser, id: 2, login: 'user2@example.com' }
       ];
-      
+
       mockQueryBuilder.select.mockImplementation(() => {
         return {
           ...mockQueryBuilder,

@@ -2,6 +2,16 @@ import { ReceitaRepository } from '../../../source/repositories/receita.reposito
 import { Receita, ReceitaEntity } from '../../../source/domain/entities/Receita';
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '../../../source/utils/constants';
 
+// Mock console.error to prevent error messages in test output
+const originalConsoleError = console.error;
+beforeAll(() => {
+  console.error = jest.fn();
+});
+
+afterAll(() => {
+  console.error = originalConsoleError;
+});
+
 // Mock the database module
 jest.mock('../../../source/config/database', () => {
   // Create mock query builder
@@ -141,7 +151,7 @@ describe('ReceitaRepository', () => {
       mockQueryBuilder.limit.mockReturnThis();
       mockQueryBuilder.offset.mockReturnThis();
       mockQueryBuilder.select.mockReturnThis();
-      
+
       // Mock the array of recipes returned by the query
       const mockRecipes = [
         {
@@ -151,7 +161,7 @@ describe('ReceitaRepository', () => {
           categoria_nome: 'Test Category'
         }
       ];
-      
+
       // Setup the then method to return the mock recipes
       mockQueryBuilder.then = jest.fn().mockImplementation((callback) => {
         return Promise.resolve(callback(mockRecipes));
@@ -325,9 +335,9 @@ describe('ReceitaRepository', () => {
         modo_preparo: 'New preparation',
         ingredientes: 'New ingredients'
       };
-      
+
       mockQueryBuilder.insert.mockResolvedValue([2]); // Return new ID
-      
+
       // Mock the findById call that happens after insert
       jest.spyOn(receitaRepository, 'findById').mockResolvedValue({
         ...newRecipe,
@@ -352,7 +362,7 @@ describe('ReceitaRepository', () => {
         criado_em: expect.any(Date),
         alterado_em: expect.any(Date)
       }));
-      
+
       expect(receitaRepository.findById).toHaveBeenCalledWith(2);
       expect(result).toEqual(expect.objectContaining({
         id: 2,
@@ -371,7 +381,7 @@ describe('ReceitaRepository', () => {
         modo_preparo: 'New preparation',
         ingredientes: 'New ingredients'
       };
-      
+
       const error = new Error('Database error');
       mockQueryBuilder.insert.mockRejectedValue(error);
 
@@ -389,9 +399,9 @@ describe('ReceitaRepository', () => {
         nome: 'Updated Recipe',
         tempo_preparo_minutos: 60
       };
-      
+
       mockQueryBuilder.update.mockResolvedValue(1); // 1 row affected
-      
+
       // Mock the findById call that happens after update
       jest.spyOn(receitaRepository, 'findById').mockResolvedValue({
         ...mockRecipe,
@@ -411,7 +421,7 @@ describe('ReceitaRepository', () => {
         tempo_preparo_minutos: updateData.tempo_preparo_minutos,
         alterado_em: expect.any(Date)
       }));
-      
+
       expect(receitaRepository.findById).toHaveBeenCalledWith(1);
       expect(result).toEqual(expect.objectContaining({
         id: 1,
@@ -427,9 +437,9 @@ describe('ReceitaRepository', () => {
         usuario: { id: 1, nome: 'User', login: 'user@example.com', senha: '' },
         categoria: { id: 1, nome: 'Category' }
       };
-      
+
       mockQueryBuilder.update.mockResolvedValue(1); // 1 row affected
-      
+
       // Mock the findById call that happens after update
       jest.spyOn(receitaRepository, 'findById').mockResolvedValue({
         ...mockRecipe,
@@ -443,13 +453,13 @@ describe('ReceitaRepository', () => {
       // Assert
       expect(db).toHaveBeenCalledWith('receitas');
       expect(mockQueryBuilder.where).toHaveBeenCalledWith({ id: 1 });
-      
+
       // Check that usuario and categoria were removed from update data
       const updateCall = mockQueryBuilder.update.mock.calls[0][0];
       expect(updateCall.usuario).toBeUndefined();
       expect(updateCall.categoria).toBeUndefined();
       expect(updateCall.nome).toBe('Updated Recipe');
-      
+
       expect(receitaRepository.findById).toHaveBeenCalledWith(1);
       expect(result).toEqual(expect.objectContaining({
         id: 1,
@@ -462,7 +472,7 @@ describe('ReceitaRepository', () => {
       const updateData: Partial<Receita> = {
         nome: 'Updated Recipe'
       };
-      
+
       const error = new Error('Database error');
       mockQueryBuilder.update.mockRejectedValue(error);
 

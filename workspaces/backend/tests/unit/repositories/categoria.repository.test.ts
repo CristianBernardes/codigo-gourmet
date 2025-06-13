@@ -1,6 +1,16 @@
 import { CategoriaRepository } from '../../../source/repositories/categoria.repository';
 import { Categoria, CategoriaEntity } from '../../../source/domain/entities/Categoria';
 
+// Mock console.error to prevent error messages in test output
+const originalConsoleError = console.error;
+beforeAll(() => {
+  console.error = jest.fn();
+});
+
+afterAll(() => {
+  console.error = originalConsoleError;
+});
+
 // Mock the database module
 jest.mock('../../../source/config/database', () => {
   // Create mock query builder
