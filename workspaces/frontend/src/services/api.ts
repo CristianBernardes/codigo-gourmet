@@ -3,7 +3,7 @@ import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } fro
 
 // Create a base API instance
 const api: AxiosInstance = axios.create({
-  baseURL: 'http://localhost:3000/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },

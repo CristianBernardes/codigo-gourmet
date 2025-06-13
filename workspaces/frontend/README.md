@@ -8,6 +8,15 @@ Este é o frontend do projeto Código Gourmet, desenvolvido com Vue 3, TypeScrip
 - Node.js instalado
 - NPM (Node Package Manager) instalado
 
+### Configuração de ambiente
+Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
+```
+VITE_API_BASE_URL=http://localhost:3000/api
+```
+Você pode ajustar a URL da API conforme necessário para seu ambiente.
+
+Um arquivo `.env.example` foi incluído no projeto como referência. Você pode copiar este arquivo e renomeá-lo para `.env` para começar.
+
 ### Instalação de dependências
 ```bash
 npm install
