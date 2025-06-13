@@ -1,5 +1,40 @@
-# Vue 3 + TypeScript + Vite
+# Código Gourmet - Frontend
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Este é o frontend do projeto Código Gourmet, desenvolvido com Vue 3, TypeScript e Vite.
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+## Passo a passo para iniciar o sistema
+
+### Pré-requisitos
+- Node.js instalado
+- NPM (Node Package Manager) instalado
+
+### Instalação de dependências
+```bash
+npm install
+```
+
+### Iniciar o servidor de desenvolvimento
+```bash
+npm run dev
+```
+Isso iniciará o servidor de desenvolvimento Vite. Após a execução, você poderá acessar a aplicação no navegador através do endereço indicado no terminal (geralmente http://localhost:5173).
+
+### Compilar para produção
+```bash
+npm run build
+```
+Este comando irá gerar os arquivos otimizados para produção na pasta `dist`.
+
+### Visualizar a versão de produção localmente
+```bash
+npm run preview
+```
+Este comando permite visualizar a versão de produção localmente antes de realizar o deploy.
+
+## Tecnologias utilizadas
+- Vue 3
+- TypeScript
+- Vite
+- Pinia (gerenciamento de estado)
+- Vue Router
+- Tailwind CSS
