@@ -1,8 +1,5 @@
 import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
 import { JWT_SECRET, JWT_EXPIRES_IN } from '../utils/constants';
-
-dotenv.config();
 
 export interface JwtPayload {
   id: number;

@@ -3,12 +3,9 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
-import dotenv from 'dotenv';
 import { RATE_LIMIT_WINDOW_MS, RATE_LIMIT_MAX_REQUESTS, IS_PRODUCTION, IS_TEST } from '../utils/constants';
 import { container } from '../di/container';
 import { errorMiddleware } from '../middlewares/error.middleware';
-
-dotenv.config();
 
 // Create Express app
 const app = express();

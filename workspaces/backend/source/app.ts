@@ -1,4 +1,3 @@
-import dotenv from 'dotenv';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJSDoc from 'swagger-jsdoc';
 import appConfig from './config/app';
@@ -6,9 +5,6 @@ import { container } from './di/container';
 import { errorMiddleware } from './middlewares/error.middleware';
 import swaggerDefinition from '../swaggerDef';
 import { API_PREFIX, API_VERSION } from './utils/constants';
-
-// Load environment variables
-dotenv.config();
 
 // Initialize database
 import './config/database';

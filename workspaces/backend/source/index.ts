@@ -3,12 +3,8 @@
 
 import app from './app';
 import { logger } from './utils/logger';
-import dotenv from 'dotenv';
 import { closeConnection } from './config/database';
 import { PORT, NODE_ENV, IS_TEST } from './utils/constants';
-
-// Ensure environment variables are loaded
-dotenv.config();
 
 // Only run the server if not in test environment
 if (!IS_TEST) {

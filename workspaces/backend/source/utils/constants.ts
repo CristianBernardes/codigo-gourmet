@@ -1,6 +1,10 @@
 /**
  * Application-wide constants
  */
+import dotenv from 'dotenv';
+
+// Ensure environment variables are loaded
+dotenv.config();
 
 // Environment
 export const NODE_ENV = process.env.NODE_ENV || 'development';

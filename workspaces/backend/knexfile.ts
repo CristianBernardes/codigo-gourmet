@@ -1,9 +1,6 @@
-import dotenv from 'dotenv';
 import { Knex } from 'knex';
 import path from 'path';
 import { DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME, IS_DEVELOPMENT } from './source/utils/constants';
-
-dotenv.config();
 
 const config: { [key: string]: Knex.Config } = {
   development: {

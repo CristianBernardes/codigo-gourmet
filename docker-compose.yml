@@ -1,0 +1,55 @@
+services:
+  backend:
+    container_name: backend
+    build:
+      context: ./workspaces/backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    working_dir: /app
+    volumes:
+      - ./workspaces/backend:/app
+    networks:
+      - codigo-gourmet
+    depends_on:
+      - mysql
+
+  frontend:
+    container_name: frontend
+    build:
+      context: ./workspaces/frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    working_dir: /app
+    volumes:
+      - ./workspaces/frontend:/app
+    networks:
+      - codigo-gourmet
+    depends_on:
+      - backend
+
+  mysql:
+    container_name: mysql
+    image: mysql:8.0.32
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: desafio
+      MYSQL_PASSWORD: desafio
+      MYSQL_USER: desafio
+      MYSQL_DATABASE: codigo_gourmet
+    volumes:
+      - ./.docker/mysql/dbdata:/var/lib/mysql # Mapeia o diretório local ".docker/mysql/dbdata" para o diretório de dados do MySQL no container
+      - ./scripts:/docker-entrypoint-initdb.d # Mapeia o diretório local "./confs" para o diretório onde scripts de inicialização serão executados ao iniciar o MySQL
+    command: --default-authentication-plugin=mysql_native_password --sql-mode="STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION" --skip-ssl # Configurações adicionais para o MySQL, incluindo modo de autenticação e configuração de SQL modes
+    ports:
+      - "3368:3306" # Mapeia a porta 3368 do host para a porta 3306 do container (porta padrão do MySQL)
+    networks:
+      - codigo-gourmet # Conecta o container à rede chamada "codigo-gourmet"
+
+# Definição das redes
+networks:
+  codigo-gourmet:
+    driver: bridge
