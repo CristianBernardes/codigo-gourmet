@@ -13,38 +13,18 @@ RUN apk add --no-cache \
     mysql-client \
     netcat-openbsd
 
-# Copiar package.json e package-lock.json
-COPY package*.json ./
-
-# Instalar dependências
-RUN npm install
+# Copiar script
+COPY ./init_backend.sh /app/
+RUN chmod +x /app/init_backend.sh
 
 # Criar diretório para logs se necessário
 RUN mkdir -p /app/logs
 
-# Adicionar script de espera para o MySQL
-COPY <<EOF /wait-for-mysql.sh
-#!/bin/sh
-set -e
-
-host="\$1"
-port="\$2"
-shift 2
-cmd="\$@"
-
-until nc -z "\$host" "\$port"; do
-  echo "Waiting for MySQL at \$host:\$port..."
-  sleep 1
-done
-
-echo "MySQL is up - executing command"
-exec \$cmd
-EOF
-
-RUN chmod +x /wait-for-mysql.sh
+# Copiar o restante do código fonte
+COPY . .
 
 # Expor porta
 EXPOSE 3000
 
-# Comando para esperar o MySQL e iniciar a aplicação
-CMD ["/wait-for-mysql.sh", "mysql", "3306", "npm", "run", "dev", "--", "--host", "0.0.0.0"]
+# Executa o container usando shell para interpretar o script
+CMD ["sh", "/app/init_backend.sh"]
