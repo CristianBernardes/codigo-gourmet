@@ -51,9 +51,9 @@ docker-compose down
 
 Após iniciar os containers, você pode acessar:
 
-- **Frontend**: http://localhost:3000
-- **API**: http://localhost:8000
-- **Documentação da API**: http://localhost:8000/api-docs
+- **Frontend**: http://localhost:5173
+- **API**: http://localhost:3000
+- **Documentação da API**: http://localhost:3000/api-docs
 
 ## 🛠️ Tecnologias Utilizadas
 
@@ -77,10 +77,6 @@ Após iniciar os containers, você pode acessar:
 ## 📝 Documentação
 
 Para mais detalhes sobre a implementação técnica, consulte o arquivo `desafio_tecnico.md` na raiz do projeto.
-
-## 📄 Licença
-
-Este projeto está sob a licença [MIT](LICENSE).
 
 ---
 

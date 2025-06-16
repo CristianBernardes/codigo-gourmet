@@ -3,9 +3,9 @@
 ## Sistema de Cadastro e Gerenciamento de Receitas Culinárias
 
 **Responsável:** Cristian Anderson Oliveira Bernardes  
-**Versão:** 2.0  
-**Data:** 10/06/2025  
-**Status:** Especificação Técnica Completa
+**Versão:** 3.0  
+**Data:** 15/06/2025  
+**Status:** Implementação Completa
 
 ---
 
@@ -55,27 +55,27 @@ Desenvolver um sistema web completo para cadastro e gerenciamento de receitas cu
 
 #### Backend
 - **Runtime:** Node.js 20+ LTS
-- **Linguagem:** TypeScript 5.0+
-- **Framework:** Express.js 4.18+
-- **ORM:** Knex.js + Objection.js
-- **Banco de Dados:** MySQL 8.0+
-- **Autenticação:** JWT (jsonwebtoken)
-- **Validação:** Joi
-- **Criptografia:** bcrypt
-- **Cors:** cors
-- **Rate Limiting:** express-rate-limit
+- **Linguagem:** TypeScript 5.8.3
+- **Framework:** Express.js 5.1.0
+- **ORM:** Knex.js 3.1.0 + Objection.js 3.1.5
+- **Banco de Dados:** MySQL 8.0.32
+- **Autenticação:** JWT (jsonwebtoken 9.0.2)
+- **Validação:** Joi 17.13.3
+- **Criptografia:** bcrypt 6.0.0
+- **Cors:** cors 2.8.5
+- **Rate Limiting:** express-rate-limit 7.5.0
+- **Segurança:** helmet 8.1.0
+- **Logging:** morgan 1.10.0
+- **Documentação API:** swagger-ui-express 5.0.0
 
 #### Frontend
-- **Framework:** Vue.js 3.3+ (Composition API)
-- **Build Tool:** Vite
-- **Linguagem:** TypeScript
-- **Estilização:** Tailwind CSS
-- **Componentes:** Headless UI
-- **Ícones:** Heroicons
-- **HTTP Client:** Axios
-- **Roteamento:** Vue Router
-- **Estado:** Pinia
-- **Validação:** VeeValidate + Yup
+- **Framework:** Vue.js 3.5.13 (Composition API)
+- **Build Tool:** Vite 6.3.5
+- **Linguagem:** TypeScript 5.8.3
+- **Estilização:** Tailwind CSS 3.4.17
+- **HTTP Client:** Axios 1.9.0
+- **Roteamento:** Vue Router 4.5.1
+- **Estado:** Pinia 3.0.3
 
 #### Paleta de Cores (Tailwind CSS)
 Como se trata de um sistema de receitas culinárias, o ideal é usar uma combinação que remeta ao apetite, mas sem parecer fast-food genérico.
@@ -110,7 +110,7 @@ Como se trata de um sistema de receitas culinárias, o ideal é usar uma combina
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Frontend      │    │   Backend       │    │   Database      │
 │   (Vue.js)      │◄──►│   (Node.js)     │◄──►│   (MySQL)       │
-│   Port: 3000    │    │   Port: 3001    │    │   Port: 3306    │
+│   Port: 5173    │    │   Port: 3000    │    │   Port: 3306    │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
@@ -486,156 +486,164 @@ A estrutura abaixo segue os princípios SOLID, com clara separação de responsa
 
 ```
 backend/
-├── src/
-│   ├── config/                     # Configurações da aplicação
-│   │   ├── database.ts             # Configuração do banco de dados
-│   │   ├── jwt.ts                  # Configuração de autenticação JWT
-│   │   └── app.ts                  # Configurações gerais da aplicação
-│   ├── controllers/                # Controladores (camada de apresentação)
-│   │   ├── auth.controller.ts      # Controlador de autenticação
-│   │   ├── receitas.controller.ts  # Controlador de receitas
-│   │   └── categorias.controller.ts # Controlador de categorias
-│   ├── middlewares/                # Middlewares do Express
-│   │   ├── auth.middleware.ts      # Middleware de autenticação
-│   │   ├── validation.middleware.ts # Middleware de validação
-│   │   ├── error.middleware.ts     # Middleware de tratamento de erros
-│   │   └── rate-limit.middleware.ts # Middleware de limitação de requisições
-│   ├── domain/                     # Camada de domínio (regras de negócio)
-│   │   ├── entities/               # Entidades de domínio
-│   │   │   ├── Usuario.ts          # Entidade de usuário
-│   │   │   ├── Receita.ts          # Entidade de receita
-│   │   │   └── Categoria.ts        # Entidade de categoria
-│   │   ├── interfaces/             # Interfaces e tipos
-│   │   │   ├── repositories/       # Interfaces de repositórios
-│   │   │   │   ├── IUsuarioRepository.ts
-│   │   │   │   ├── IReceitaRepository.ts
-│   │   │   │   └── ICategoriaRepository.ts
-│   │   │   └── services/           # Interfaces de serviços
-│   │   │       ├── IAuthService.ts
-│   │   │       ├── IReceitaService.ts
-│   │   │       └── ICategoriaService.ts
-│   │   └── dtos/                   # Objetos de transferência de dados
-│   │       ├── auth/
-│   │       ├── receitas/
-│   │       └── categorias/
-│   ├── services/                   # Implementações de serviços (casos de uso)
-│   │   ├── auth.service.ts         # Serviço de autenticação
-│   │   ├── receitas.service.ts     # Serviço de receitas
-│   │   └── categorias.service.ts   # Serviço de categorias
-│   ├── repositories/               # Implementações de repositórios
-│   │   ├── usuario.repository.ts   # Repositório de usuários
-│   │   ├── receita.repository.ts   # Repositório de receitas
-│   │   └── categoria.repository.ts # Repositório de categorias
-│   ├── validators/                 # Validadores de entrada
-│   │   ├── auth.validator.ts       # Validador de autenticação
-│   │   └── receitas.validator.ts   # Validador de receitas
-│   ├── routes/                     # Rotas da API
-│   │   ├── auth.routes.ts          # Rotas de autenticação
-│   │   ├── receitas.routes.ts      # Rotas de receitas
-│   │   └── categorias.routes.ts    # Rotas de categorias
-│   ├── utils/                      # Utilitários
-│   │   ├── logger.ts               # Configuração de logs
-│   │   ├── response.ts             # Formatador de respostas
-│   │   ├── errors/                 # Classes de erro personalizadas
-│   │   │   ├── AppError.ts         # Erro base da aplicação
-│   │   │   ├── ValidationError.ts  # Erro de validação
-│   │   │   └── NotFoundError.ts    # Erro de recurso não encontrado
-│   │   └── constants.ts            # Constantes da aplicação
-│   ├── di/                         # Injeção de dependências
-│   │   └── container.ts            # Container de DI
-│   └── app.ts                      # Ponto de entrada da aplicação
-├── migrations/                     # Migrações do banco de dados
+├── coverage/                      # Relatórios de cobertura de testes
+├── docs/                          # Documentação
+│   └── api.yaml                   # Especificação OpenAPI
+├── logs/                          # Logs da aplicação
+│   ├── combined.log
+│   └── error.log
+├── migrations/                    # Migrações do banco de dados
 │   ├── 001_create_usuarios.ts
 │   ├── 002_create_categorias.ts
 │   └── 003_create_receitas.ts
-├── seeds/                          # Seeds para dados iniciais
+├── seeds/                         # Seeds para dados iniciais
 │   ├── 01_categorias.ts
 │   ├── 02_usuarios_teste.ts
 │   └── 03_receitas_exemplo.ts
-├── tests/                          # Testes automatizados
-│   ├── unit/                       # Testes unitários
-│   │   ├── services/
-│   │   ├── repositories/
-│   │   └── validators/
-│   ├── integration/                # Testes de integração
-│   │   └── controllers/
-│   ├── e2e/                        # Testes end-to-end
-│   │   └── api/
-│   └── setup.ts                    # Configuração dos testes
-├── docs/                           # Documentação
-│   └── api.yaml                    # Especificação OpenAPI
-├── package.json                    # Dependências e scripts
-├── tsconfig.json                   # Configuração do TypeScript
-└── knexfile.ts                     # Configuração do Knex
+├── source/                        # Código fonte da aplicação
+│   ├── app.ts                     # Configuração do Express
+│   ├── config/                    # Configurações da aplicação
+│   │   ├── app.ts                 # Configurações gerais da aplicação
+│   │   ├── database.ts            # Configuração do banco de dados
+│   │   └── jwt.ts                 # Configuração de autenticação JWT
+│   ├── controllers/               # Controladores (camada de apresentação)
+│   │   ├── auth.controller.ts     # Controlador de autenticação
+│   │   ├── categorias.controller.ts # Controlador de categorias
+│   │   └── receitas.controller.ts # Controlador de receitas
+│   ├── di/                        # Injeção de dependências
+│   │   └── container.ts           # Container de DI
+│   ├── docs/                      # Documentação da API
+│   │   └── swagger.schemas.ts     # Esquemas Swagger
+│   ├── domain/                    # Camada de domínio (regras de negócio)
+│   │   ├── dtos/                  # Objetos de transferência de dados
+│   │   │   ├── auth/
+│   │   │   ├── categorias/
+│   │   │   └── receitas/
+│   │   ├── entities/              # Entidades de domínio
+│   │   │   ├── Categoria.ts       # Entidade de categoria
+│   │   │   ├── Receita.ts         # Entidade de receita
+│   │   │   └── Usuario.ts         # Entidade de usuário
+│   │   └── interfaces/            # Interfaces e tipos
+│   │       ├── repositories/      # Interfaces de repositórios
+│   │       │   ├── ICategoriaRepository.ts
+│   │       │   ├── IReceitaRepository.ts
+│   │       │   └── IUsuarioRepository.ts
+│   │       └── services/          # Interfaces de serviços
+│   │           ├── IAuthService.ts
+│   │           ├── ICategoriaService.ts
+│   │           └── IReceitaService.ts
+│   ├── index.ts                   # Ponto de entrada da aplicação
+│   ├── middlewares/               # Middlewares do Express
+│   │   ├── auth.middleware.ts     # Middleware de autenticação
+│   │   ├── error.middleware.ts    # Middleware de tratamento de erros
+│   │   ├── rate-limit.middleware.ts # Middleware de limitação de requisições
+│   │   └── validation.middleware.ts # Middleware de validação
+│   ├── repositories/              # Implementações de repositórios
+│   │   ├── categoria.repository.ts # Repositório de categorias
+│   │   ├── receita.repository.ts  # Repositório de receitas
+│   │   └── usuario.repository.ts  # Repositório de usuários
+│   ├── routes/                    # Rotas da API
+│   │   ├── auth.routes.ts         # Rotas de autenticação
+│   │   ├── categorias.routes.ts   # Rotas de categorias
+│   │   └── receitas.routes.ts     # Rotas de receitas
+│   ├── services/                  # Implementações de serviços (casos de uso)
+│   │   ├── auth.service.ts        # Serviço de autenticação
+│   │   ├── categorias.service.ts  # Serviço de categorias
+│   │   └── receitas.service.ts    # Serviço de receitas
+│   ├── types/                     # Tipos TypeScript
+│   │   └── swaggerDef.d.ts        # Definições de tipos para Swagger
+│   ├── utils/                     # Utilitários
+│   │   ├── constants.ts           # Constantes da aplicação
+│   │   ├── errors/                # Classes de erro personalizadas
+│   │   │   ├── AppError.ts        # Erro base da aplicação
+│   │   │   ├── NotFoundError.ts   # Erro de recurso não encontrado
+│   │   │   └── ValidationError.ts # Erro de validação
+│   │   ├── logger.ts              # Configuração de logs
+│   │   └── response.ts            # Formatador de respostas
+│   └── validators/                # Validadores de entrada
+│       ├── auth.validator.ts      # Validador de autenticação
+│       └── receitas.validator.ts  # Validador de receitas
+├── tests/                         # Testes automatizados
+│   ├── integration/               # Testes de integração
+│   │   └── api/                   # Testes de API
+│   │       ├── auth.test.ts
+│   │       ├── categorias.test.ts
+│   │       └── receitas.test.ts
+│   ├── setup.ts                   # Configuração dos testes
+│   └── unit/                      # Testes unitários
+│       ├── controllers/           # Testes de controladores
+│       ├── middlewares/           # Testes de middlewares
+│       ├── repositories/          # Testes de repositórios
+│       ├── services/              # Testes de serviços
+│       └── utils/                 # Testes de utilitários
+├── Dockerfile                     # Configuração do Docker
+├── init_backend.sh                # Script de inicialização
+├── jest.config.js                 # Configuração do Jest
+├── knexfile.ts                    # Configuração do Knex
+├── package.json                   # Dependências e scripts
+├── package-lock.json              # Lock de dependências
+├── README.md                      # Documentação do backend
+└── tsconfig.json                  # Configuração do TypeScript
 ```
 
 ### 6.2 Estrutura do Frontend
 
 ```
 frontend/
-├── src/
-│   ├── components/
-│   │   ├── common/
-│   │   │   ├── AppHeader.vue
-│   │   │   ├── AppFooter.vue
-│   │   │   ├── LoadingSpinner.vue
-│   │   │   └── Modal.vue
-│   │   ├── auth/
-│   │   │   ├── LoginForm.vue
-│   │   │   └── RegisterForm.vue
-│   │   └── receitas/
-│   │       ├── ReceitaCard.vue
-│   │       ├── ReceitaForm.vue
-│   │       ├── ReceitaList.vue
-│   │       └── ReceitaFilter.vue
-│   ├── views/
-│   │   ├── Home.vue
-│   │   ├── Login.vue
-│   │   ├── Register.vue
-│   │   ├── Receitas.vue
-│   │   ├── NovaReceita.vue
-│   │   ├── EditarReceita.vue
-│   │   └── ImprimirReceita.vue
-│   ├── stores/
-│   │   ├── auth.ts
-│   │   ├── receitas.ts
-│   │   └── categorias.ts
-│   ├── composables/
-│   │   ├── useAuth.ts
-│   │   ├── useReceitas.ts
-│   │   └── useToast.ts
-│   ├── services/
-│   │   ├── api.ts
-│   │   ├── auth.service.ts
-│   │   └── receitas.service.ts
-│   ├── types/
-│   │   ├── auth.types.ts
-│   │   ├── receita.types.ts
-│   │   └── api.types.ts
-│   ├── utils/
-│   │   ├── constants.ts
-│   │   ├── formatters.ts
-│   │   └── validation.ts
-│   ├── styles/
-│   │   ├── main.css
-│   │   └── print.css
-│   ├── router/
-│   │   └── index.ts
-│   ├── App.vue
-│   └── main.ts
-├── public/
-│   ├── favicon.ico
-│   └── index.html
-├── cypress/
-│   ├── e2e/
-│   │   ├── auth.cy.ts
-│   │   └── receitas.cy.ts
-│   ├── fixtures/
-│   └── support/
-├── package.json
-├── tsconfig.json
-├── tailwind.config.js
-└── vite.config.ts
+├── public/                      # Arquivos públicos estáticos
+│   └── vite.svg                 # Ícone do Vite
+├── src/                         # Código fonte da aplicação
+│   ├── assets/                  # Recursos estáticos
+│   │   └── vue.svg              # Logo Vue
+│   ├── components/              # Componentes reutilizáveis
+│   │   └── common/              # Componentes comuns
+│   │       ├── Button.vue       # Componente de botão
+│   │       └── Input.vue        # Componente de entrada
+│   ├── router/                  # Configuração de rotas
+│   │   └── index.ts             # Definição de rotas
+│   ├── services/                # Serviços de API
+│   │   ├── api.ts               # Configuração base da API
+│   │   ├── authService.ts       # Serviço de autenticação
+│   │   ├── categoryService.ts   # Serviço de categorias
+│   │   └── recipeService.ts     # Serviço de receitas
+│   ├── stores/                  # Gerenciamento de estado (Pinia)
+│   │   ├── authStore.ts         # Store de autenticação
+│   │   ├── categoryStore.ts     # Store de categorias
+│   │   └── recipeStore.ts       # Store de receitas
+│   ├── types/                   # Definições de tipos TypeScript
+│   │   └── models.ts            # Modelos de dados
+│   ├── utils/                   # Utilitários
+│   ├── views/                   # Componentes de página
+│   │   ├── auth/                # Páginas de autenticação
+│   │   │   ├── LoginView.vue    # Página de login
+│   │   │   ├── ProfileView.vue  # Página de perfil
+│   │   │   └── RegisterView.vue # Página de registro
+│   │   ├── categories/          # Páginas de categorias
+│   │   │   ├── CategoryDetailView.vue # Detalhes da categoria
+│   │   │   └── CategoryListView.vue   # Lista de categorias
+│   │   ├── HomeView.vue         # Página inicial
+│   │   ├── NotFoundView.vue     # Página 404
+│   │   └── recipes/             # Páginas de receitas
+│   │       ├── MyRecipesView.vue     # Minhas receitas
+│   │       ├── RecipeDetailView.vue  # Detalhes da receita
+│   │       ├── RecipeFormView.vue    # Formulário de receita
+│   │       └── RecipeListView.vue    # Lista de receitas
+│   ├── App.vue                  # Componente raiz
+│   ├── main.ts                  # Ponto de entrada
+│   ├── style.css                # Estilos globais
+│   └── vite-env.d.ts            # Definições de ambiente Vite
+├── Dockerfile                   # Configuração do Docker
+├── index.html                   # HTML principal
+├── init_frontend.sh             # Script de inicialização
+├── package.json                 # Dependências e scripts
+├── package-lock.json            # Lock de dependências
+├── postcss.config.js            # Configuração do PostCSS
+├── README.md                    # Documentação do frontend
+├── tailwind.config.js           # Configuração do Tailwind CSS
+├── tsconfig.app.json            # Configuração do TypeScript para a aplicação
+├── tsconfig.json                # Configuração base do TypeScript
+├── tsconfig.node.json           # Configuração do TypeScript para Node
+└── vite.config.ts               # Configuração do Vite
 ```
 
 ---
@@ -916,127 +924,193 @@ VITE_ENABLE_DEVTOOLS=true
 
 #### docker-compose.yml
 ```yaml
-version: '3.8'
-
 services:
-  # Banco de dados MySQL
-  mysql:
-    image: mysql:8.0
-    container_name: receitas_mysql
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: teste_receitas_rg_sistemas
-      MYSQL_USER: receitas_user
-      MYSQL_PASSWORD: receitas_password
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - receitas_network
-
-  # Backend API
   backend:
+    container_name: backend
     build:
-      context: ./backend
+      context: ./workspaces/backend
       dockerfile: Dockerfile
-    container_name: receitas_backend
     restart: unless-stopped
-    environment:
-      NODE_ENV: production
-      PORT: 3001
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_NAME: teste_receitas_rg_sistemas
-      DB_USER: receitas_user
-      DB_PASSWORD: receitas_password
-      JWT_SECRET: sua-chave-jwt-super-secreta-aqui
-      FRONTEND_URL: http://localhost:3000
-    ports:
-      - "3001:3001"
-    depends_on:
-      - mysql
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
-    networks:
-      - receitas_network
-
-  # Frontend Vue.js
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: receitas_frontend
-    restart: unless-stopped
-    environment:
-      VITE_API_URL: http://localhost:3001/api
     ports:
       - "3000:3000"
+    working_dir: /app
+    volumes:
+      - ./workspaces/backend:/app
+    networks:
+      - codigo-gourmet
+    depends_on:
+      - mysql
+
+  frontend:
+    container_name: frontend
+    build:
+      context: ./workspaces/frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    working_dir: /app
+    volumes:
+      - ./workspaces/frontend:/app
+    networks:
+      - codigo-gourmet
     depends_on:
       - backend
+
+  mysql:
+    container_name: mysql
+    image: mysql:8.0.32
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: desafio
+      MYSQL_PASSWORD: desafio
+      MYSQL_USER: desafio
+      MYSQL_DATABASE: codigo_gourmet
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - ./.docker/mysql/dbdata:/var/lib/mysql
+      - ./scripts:/docker-entrypoint-initdb.d
+    command: --default-authentication-plugin=mysql_native_password --sql-mode="STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION" --skip-ssl
+    ports:
+      - "3368:3306"
     networks:
-      - receitas_network
+      - codigo-gourmet
 
-volumes:
-  mysql_data:
-
+# Definição das redes
 networks:
-  receitas_network:
+  codigo-gourmet:
     driver: bridge
 ```
 
 #### Backend Dockerfile
 ```dockerfile
+# Dockerfile otimizado para backend
 FROM node:20-alpine
 
+# Definir diretório de trabalho
 WORKDIR /app
 
-# Instalar dependências
-COPY package*.json ./
-RUN npm ci --only=production
+# Instalar dependências do sistema necessárias para MySQL e compilação
+RUN apk add --no-cache \
+    git \
+    python3 \
+    make \
+    g++ \
+    mysql-client \
+    netcat-openbsd
 
-# Copiar código fonte
+# Copiar script
+COPY ./init_backend.sh /app/
+RUN chmod +x /app/init_backend.sh
+
+# Criar diretório para logs se necessário
+RUN mkdir -p /app/logs
+
+# Copiar o restante do código fonte
 COPY . .
 
-# Build da aplicação
-RUN npm run build
-
 # Expor porta
-EXPOSE 3001
+EXPOSE 3000
 
-# Comando de inicialização
-CMD ["npm", "start"]
+# Executa o container usando shell para interpretar o script
+CMD ["sh", "/app/init_backend.sh"]
 ```
 
 #### Frontend Dockerfile
 ```dockerfile
-FROM node:20-alpine as build
+# Dockerfile otimizado para docker-compose
+FROM node:20-alpine
 
+# Definir diretório de trabalho
 WORKDIR /app
 
-# Instalar dependências
-COPY package*.json ./
-RUN npm ci
+# Instalar dependências globais necessárias
+RUN apk add --no-cache git
 
-# Copiar código e fazer build
+# Copiar script
+COPY ./init_frontend.sh /app/
+RUN chmod +x /app/init_frontend.sh
+
+# Copiar o restante do código fonte
 COPY . .
-RUN npm run build
 
-# Servir com nginx
-FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/nginx.conf
+# Expor porta do Vite
+EXPOSE 5173
 
-EXPOSE 3000
-
-CMD ["nginx", "-g", "daemon off;"]
+# Executa o container usando shell para interpretar o script
+CMD ["sh", "/app/init_frontend.sh"]
 ```
+
+#### Script de Inicialização do Backend (init_backend.sh)
+```bash
+#!/bin/bash
+
+# Configuração: Para na primeira falha para evitar execução com erros
+set -e
+
+echo "🚀 Iniciando Backend Node.js..."
+
+# ============================================================
+# CONFIGURAÇÃO DE AMBIENTE
+# ============================================================
+# Verifica se existe arquivo de configuração .env
+# Se não existir e houver um .env.example, cria uma cópia
+# Isso garante que as variáveis de ambiente necessárias estejam disponíveis
+[ ! -f .env ] && [ -f .env.example ] && cp .env.example .env
+
+# ============================================================
+# INSTALAÇÃO DE DEPENDÊNCIAS
+# ============================================================
+# Verifica se a pasta node_modules existe
+# Se não existir, significa que as dependências não foram instaladas
+# Executa npm install para baixar e instalar todos os pacotes necessários
+if [ ! -d "node_modules" ]; then
+    echo "📦 Pasta node_modules não encontrada. Instalando dependências..."
+    npm install
+fi
+
+# ============================================================
+# PREPARAÇÃO DO BANCO DE DADOS
+# ============================================================
+# Executa as migrações do banco de dados
+# Isso cria/atualiza as tabelas e estruturas necessárias no banco
+echo "🗄️ Executando migrações do banco de dados..."
+npm run migrate
+
+# Executa o seed do banco de dados
+# Isso popula o banco com dados iniciais necessários para o funcionamento
+echo "🌱 Populando banco de dados com dados iniciais..."
+npm run seed
+
+# ============================================================
+# INICIALIZAÇÃO DO SERVIDOR
+# ============================================================
+# Inicia o servidor backend em modo desenvolvimento
+# --host 0.0.0.0: Permite acesso de qualquer IP (útil para containers/VMs)
+# --port 3000: Define a porta específica para evitar conflitos
+echo "🌐 Iniciando servidor backend na porta 3000..."
+npm run dev -- --host 0.0.0.0 --port 3000
+```
+
+#### Script de Inicialização do Frontend (init_frontend.sh)
+```bash
+#!/bin/bash
+set -e
+
+echo "🚀 Iniciando Vue.js..."
+
+# Verifica se o arquivo .env existe, se não existir e houver .env.example, cria uma cópia
+[ ! -f .env ] && [ -f .env.example ] && cp .env.example .env
+
+# Verifica se a pasta node_modules existe, se não existir, instala as dependências
+if [ ! -d "node_modules" ]; then
+    echo "📦 Pasta node_modules não encontrada. Instalando dependências..."
+    npm install
+fi
+
+# Inicia o servidor de desenvolvimento
+npm run dev -- --host 0.0.0.0 --port 5173
+```
+
 
 ### 9.3 Scripts de Deploy
 
@@ -1044,7 +1118,7 @@ CMD ["nginx", "-g", "daemon off;"]
 ```bash
 #!/bin/bash
 
-echo "🚀 Iniciando deploy do Sistema de Receitas..."
+echo "🚀 Iniciando deploy do Sistema de Receitas Culinárias..."
 
 # Parar containers existentes
 echo "⏹️ Parando containers existentes..."
@@ -1053,10 +1127,6 @@ docker-compose down
 # Limpar volumes antigos (opcional)
 echo "🧹 Limpando volumes antigos..."
 docker volume prune -f
-
-# Fazer pull das imagens
-echo "📥 Baixando imagens atualizadas..."
-docker-compose pull
 
 # Build e iniciar containers
 echo "🏗️ Construindo e iniciando containers..."
@@ -1079,9 +1149,9 @@ echo "✅ Verificando status dos containers..."
 docker-compose ps
 
 echo "🎉 Deploy concluído com sucesso!"
-echo "Frontend: http://localhost:3000"
-echo "Backend: http://localhost:3001"
-echo "Swagger: http://localhost:3001/docs"
+echo "Frontend: http://localhost:5173"
+echo "Backend: http://localhost:3000"
+echo "MySQL: localhost:3368"
 ```
 
 ---

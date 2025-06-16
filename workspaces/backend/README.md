@@ -143,9 +143,10 @@ Authorization: Bearer seu_token_jwt
 tests/
 ├── unit/                  # Testes unitários
 │   ├── controllers/       # Testes para controladores
-│   ├── services/          # Testes para serviços
+│   ├── middlewares/       # Testes para middlewares
 │   ├── repositories/      # Testes para repositórios
-│   └── middlewares/       # Testes para middlewares
+│   ├── services/          # Testes para serviços
+│   └── utils/             # Testes para utilitários
 ├── integration/           # Testes de integração
 │   └── api/               # Testes para endpoints da API
 └── setup.ts               # Configuração do ambiente de testes
@@ -170,7 +171,7 @@ Os testes utilizam um banco de dados MySQL dedicado para testes. A configuraçã
 
 O arquivo `setup.ts` contém funções para inicializar e limpar o banco de dados antes e depois dos testes.
 
-### Executando Testes
+### Executando Testes Localmente
 
 ```bash
 # Executar todos os testes
@@ -179,15 +180,36 @@ npm test
 # Executar testes com cobertura
 npm run test:coverage
 
-# Executar apenas os testes unitários
-npm run test:unit
-
-# Executar apenas os testes de integração
-npm run test:integration
+# Executar testes em modo watch (útil durante o desenvolvimento)
+npm run test:watch
 
 # Executar um arquivo de teste específico
 npm test -- tests/unit/controllers/auth.controller.test.ts
 ```
+
+### Executando Testes no Container Docker
+
+Se você estiver usando o ambiente Docker, pode executar os testes dentro do container backend:
+
+```bash
+# Acessar o container backend
+docker exec -it backend sh
+
+# Dentro do container, executar todos os testes
+npm test
+
+# Executar testes com cobertura
+npm run test:coverage
+
+# Visualizar relatório de cobertura
+# O relatório HTML estará disponível em /app/coverage/lcov-report/index.html
+# Você pode acessá-lo pelo navegador, pois a pasta está mapeada para seu sistema local
+
+# Executar testes específicos
+npm test -- tests/unit/services/auth.service.test.ts
+```
+
+Os relatórios de cobertura gerados estarão disponíveis na pasta `coverage` do projeto, que é compartilhada entre o container e sua máquina local através do volume definido no docker-compose.yml.
 
 ### Boas Práticas de Testes
 
@@ -204,6 +226,76 @@ Um endpoint de verificação de saúde está disponível em:
 ```
 GET /health
 ```
+
+## Desenvolvimento com Docker
+
+Este projeto está configurado para ser executado em containers Docker, o que facilita o desenvolvimento e garante consistência entre diferentes ambientes.
+
+### Iniciando o Ambiente Docker
+
+Na raiz do projeto principal (não na pasta backend), execute:
+
+```bash
+# Construir e iniciar todos os containers
+docker-compose up -d
+
+# Verificar logs do backend
+docker-compose logs -f backend
+```
+
+### Acessando o Container Backend
+
+```bash
+# Acessar o shell do container
+docker exec -it backend sh
+
+# Verificar logs dentro do container
+tail -f logs/combined.log
+```
+
+### Comandos Úteis Dentro do Container
+
+```bash
+# Executar migrações do banco de dados
+npm run migrate
+
+# Executar seeds para popular o banco
+npm run seed
+
+# Gerar documentação da API
+npm run docs
+
+# Verificar dependências desatualizadas
+npm outdated
+
+# Executar linting
+npm run lint
+
+# Corrigir problemas de linting automaticamente
+npm run lint:fix
+```
+
+### Depuração
+
+Para depurar a aplicação em execução no container:
+
+1. Adicione a flag `--inspect=0.0.0.0:9229` ao comando de execução no script `init_backend.sh`
+2. Exponha a porta 9229 no docker-compose.yml
+3. Configure seu IDE para conectar ao debugger na porta 9229
+
+### Solução de Problemas Comuns
+
+1. **Erro de conexão com o banco de dados**:
+   - Verifique se o container MySQL está em execução: `docker-compose ps`
+   - Verifique as credenciais no arquivo `.env`
+   - Aguarde alguns segundos após iniciar o MySQL antes de iniciar o backend
+
+2. **Alterações no código não refletem no container**:
+   - Verifique se o volume está mapeado corretamente no docker-compose.yml
+   - Reinicie o container: `docker-compose restart backend`
+
+3. **Erros de permissão ao executar scripts**:
+   - Verifique se os scripts têm permissão de execução: `chmod +x init_backend.sh`
 
 ## Estrutura do Projeto
 
