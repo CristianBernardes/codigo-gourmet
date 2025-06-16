@@ -47,6 +47,10 @@ docker-compose logs -f
 docker-compose down
 ```
 
+A instalação dos pacotes npm e inicialização dos projetos é realizada automaticamente através dos scripts:
+- `workspaces/backend/init_backend.sh`: Instala dependências, configura o banco de dados e inicia o servidor backend
+- `workspaces/frontend/init_frontend.sh`: Instala dependências e inicia o servidor de desenvolvimento frontend
+
 ### Acessando a Aplicação
 
 Após iniciar os containers, você pode acessar:
