@@ -24,7 +24,7 @@ npm install
 
 ### Iniciar o servidor de desenvolvimento
 ```bash
-npm run dev
+npm run dev -- --host 0.0.0.0
 ```
 Isso iniciará o servidor de desenvolvimento Vite. Após a execução, você poderá acessar a aplicação no navegador através do endereço indicado no terminal (geralmente http://localhost:5173).
 
