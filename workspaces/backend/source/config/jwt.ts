@@ -17,10 +17,3 @@ export const verifyToken = (token: string): JwtPayload | null => {
     return null;
   }
 };
-
-export default {
-  secret: JWT_SECRET,
-  expiresIn: JWT_EXPIRES_IN,
-  generateToken,
-  verifyToken,
-};
