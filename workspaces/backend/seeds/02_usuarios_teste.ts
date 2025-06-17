@@ -21,8 +21,8 @@ export async function seed(knex: Knex): Promise<void> {
     },
     { 
       id: 2, 
-      nome: 'Administrador', 
-      login: 'admin@exemplo.com', 
+      nome: 'Chef Teste',
+      login: 'chef@exemplo.com',
       senha: senha2,
       criado_em: new Date(),
       alterado_em: new Date()
