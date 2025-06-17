@@ -167,7 +167,6 @@ Como se trata de um sistema de receitas culinárias, o ideal é usar uma combina
 | RF002 | Login de Usuário       | Autenticação com JWT e sessão persistente             | Alta       |
 | RF003 | Logout de Usuário      | Encerramento seguro de sessão                          | Alta       |
 | RF004 | Validação de Sessão    | Verificar token JWT em rotas protegidas                | Alta       |
-| RF005 | Recuperação de Senha   | Reset de senha por email (futuro)                     | Baixa      |
 
 ### 3.2 Módulo de Receitas
 
