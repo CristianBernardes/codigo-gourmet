@@ -53,6 +53,7 @@ app.use(apiLimiter);
 app.use('/api/auth', container.getAuthRouter());
 app.use('/api/categorias', container.getCategoriasRouter());
 app.use('/api/receitas', container.getReceitasRouter());
+app.use('/api/usuarios', container.getUsuariosRouter());
 
 // Register error handling middleware (must be after all routes)
 app.use(errorMiddleware);

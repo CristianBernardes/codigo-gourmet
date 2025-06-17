@@ -5,14 +5,17 @@ import { ReceitaRepository } from '../repositories/receita.repository';
 import { AuthService } from '../services/auth.service';
 import { CategoriaService } from '../services/categorias.service';
 import { ReceitaService } from '../services/receitas.service';
+import { UsuarioService } from '../services/usuario.service';
 
 import { AuthController } from '../controllers/auth.controller';
 import { CategoriasController } from '../controllers/categorias.controller';
 import { ReceitasController } from '../controllers/receitas.controller';
+import { UsuarioController } from '../controllers/usuario.controller';
 
 import { createAuthRouter } from '../routes/auth.routes';
 import { createCategoriasRouter } from '../routes/categorias.routes';
 import { createReceitasRouter } from '../routes/receitas.routes';
+import { createUsuariosRouter } from '../routes/usuarios.routes';
 
 import { Router } from 'express';
 
@@ -30,11 +33,13 @@ class Container {
   private authService: AuthService;
   private categoriaService: CategoriaService;
   private receitaService: ReceitaService;
+  private usuarioService: UsuarioService;
 
   // Controllers
   private authController: AuthController;
   private categoriasController: CategoriasController;
   private receitasController: ReceitasController;
+  private usuarioController: UsuarioController;
 
   constructor() {
     // Initialize repositories
@@ -49,11 +54,13 @@ class Container {
       this.receitaRepository,
       this.categoriaRepository
     );
+    this.usuarioService = new UsuarioService(this.usuarioRepository);
 
     // Initialize controllers
     this.authController = new AuthController(this.authService);
     this.categoriasController = new CategoriasController(this.categoriaService);
     this.receitasController = new ReceitasController(this.receitaService);
+    this.usuarioController = new UsuarioController(this.usuarioService);
   }
 
   /**
@@ -96,6 +103,20 @@ class Container {
    */
   getReceitasController(): ReceitasController {
     return this.receitasController;
+  }
+
+  /**
+   * Get the usuarios router
+   */
+  getUsuariosRouter(): Router {
+    return createUsuariosRouter(this.usuarioController);
+  }
+
+  /**
+   * Get the usuarios controller
+   */
+  getUsuarioController(): UsuarioController {
+    return this.usuarioController;
   }
 }
 

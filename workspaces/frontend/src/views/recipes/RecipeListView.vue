@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { useRecipeStore } from '../../stores/recipeStore';
 import { useCategoryStore } from '../../stores/categoryStore';
 import { useAuthStore } from '../../stores/authStore';
+import { useUsuarioStore } from '../../stores/usuarioStore';
 import Button from '../../components/common/Button.vue';
 import Input from '../../components/common/Input.vue';
 
@@ -11,11 +12,13 @@ const router = useRouter();
 const recipeStore = useRecipeStore();
 const categoryStore = useCategoryStore();
 const authStore = useAuthStore();
+const usuarioStore = useUsuarioStore();
 
 const isLoading = ref(true);
 const error = ref('');
 const searchTerm = ref('');
 const selectedCategory = ref<number | null>(null);
+const selectedUserId = ref<number | null>(null);
 const currentPage = ref(1);
 const pageSize = ref(10);
 const isSearching = ref(false);
@@ -24,7 +27,8 @@ onMounted(async () => {
   try {
     await Promise.all([
       loadRecipes(),
-      categoryStore.fetchCategories()
+      categoryStore.fetchCategories(),
+      usuarioStore.fetchAllUsers()
     ]);
   } catch (err) {
     error.value = 'Erro ao carregar dados. Tente novamente mais tarde.';
@@ -47,11 +51,12 @@ const loadRecipes = async () => {
 const searchRecipes = async () => {
   isSearching.value = true;
   currentPage.value = 1;
-  
+
   try {
     await recipeStore.searchRecipes({
       termo_busca: searchTerm.value,
       id_categorias: selectedCategory.value || undefined,
+      id_usuarios: selectedUserId.value || undefined,
       page: currentPage.value,
       pageSize: pageSize.value
     });
@@ -65,14 +70,15 @@ const searchRecipes = async () => {
 const clearSearch = async () => {
   searchTerm.value = '';
   selectedCategory.value = null;
+  selectedUserId.value = null;
   currentPage.value = 1;
   await loadRecipes();
 };
 
 const handlePageChange = async (page: number) => {
   currentPage.value = page;
-  
-  if (searchTerm.value || selectedCategory.value) {
+
+  if (searchTerm.value || selectedCategory.value || selectedUserId.value) {
     await searchRecipes();
   } else {
     await loadRecipes();
@@ -93,7 +99,7 @@ watch(searchTerm, () => {
   if (searchTimeout) {
     clearTimeout(searchTimeout);
   }
-  
+
   searchTimeout = setTimeout(() => {
     searchRecipes();
   }, 500) as unknown as number;
@@ -101,6 +107,11 @@ watch(searchTerm, () => {
 
 // Category change
 watch(selectedCategory, () => {
+  searchRecipes();
+});
+
+// User change
+watch(selectedUserId, () => {
   searchRecipes();
 });
 </script>
@@ -119,11 +130,11 @@ watch(selectedCategory, () => {
             Nova Receita
           </Button>
         </div>
-        
+
         <!-- Search and Filter -->
         <div class="bg-white shadow p-4 rounded-lg mb-6">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="col-span-1 md:col-span-2">
+            <div class="col-span-1">
               <Input
                 v-model="searchTerm"
                 placeholder="Buscar receitas..."
@@ -146,19 +157,35 @@ watch(selectedCategory, () => {
                 </option>
               </select>
             </div>
+            <div>
+              <select
+                v-model="selectedUserId"
+                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-red focus:ring focus:ring-primary-red focus:ring-opacity-50"
+                :disabled="isSearching"
+              >
+                <option :value="null">Todos os usuários</option>
+                <option 
+                  v-for="user in usuarioStore.allUsers" 
+                  :key="user.id" 
+                  :value="user.id"
+                >
+                  {{ user.nome }}
+                </option>
+              </select>
+            </div>
           </div>
           <div class="mt-4 flex justify-end">
             <Button 
               @click="clearSearch" 
               variant="outline" 
               size="sm" 
-              :disabled="isSearching || (!searchTerm && !selectedCategory)"
+              :disabled="isSearching || (!searchTerm && !selectedCategory && !selectedUserId)"
             >
               Limpar Filtros
             </Button>
           </div>
         </div>
-        
+
         <div v-if="error" class="rounded-md bg-red-50 p-4 mb-4">
           <div class="flex">
             <div class="ml-3">
@@ -166,17 +193,17 @@ watch(selectedCategory, () => {
             </div>
           </div>
         </div>
-        
+
         <div v-if="isLoading || isSearching" class="flex justify-center items-center h-64">
           <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-red"></div>
         </div>
-        
+
         <div v-else>
           <div class="bg-white shadow overflow-hidden sm:rounded-lg">
             <div v-if="recipeStore.recipes.length === 0" class="px-4 py-5 sm:p-6 text-center">
               <p class="text-gray-500">Nenhuma receita encontrada.</p>
             </div>
-            
+
             <ul v-else class="divide-y divide-gray-200">
               <li 
                 v-for="recipe in recipeStore.recipes" 
@@ -204,7 +231,7 @@ watch(selectedCategory, () => {
                 </div>
               </li>
             </ul>
-            
+
             <!-- Pagination -->
             <div v-if="recipeStore.totalPages > 1" class="px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
               <div class="flex-1 flex justify-between sm:hidden">
