@@ -122,9 +122,9 @@ watch(selectedUserId, () => {
       <div class="px-4 py-6 sm:px-0">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
           <h1 class="text-2xl font-semibold text-dark-gray mb-4 sm:mb-0">Receitas Culinárias</h1>
-          <Button 
-            v-if="authStore.isLoggedIn" 
-            @click="goToCreateRecipe" 
+          <Button
+            v-if="authStore.isLoggedIn"
+            @click="goToCreateRecipe"
             variant="primary"
           >
             Nova Receita
@@ -146,9 +146,9 @@ watch(selectedUserId, () => {
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div class="col-span-1">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Termo de Busca</label>
-                <div class="relative rounded-md shadow-sm">
+                <div class="relative rounded-md shadow-md hover:shadow-lg transition-all duration-300 group">
                   <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary-red opacity-70 group-hover:opacity-100 transition-opacity duration-300" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
                     </svg>
                   </div>
@@ -156,7 +156,7 @@ watch(selectedUserId, () => {
                     v-model="searchTerm"
                     placeholder="Buscar receitas..."
                     :disabled="isSearching"
-                    class="pl-10"
+                    class="pl-10 py-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-all duration-300 focus:border-primary-red focus:ring-primary-red focus:ring-opacity-50 focus:shadow-inner placeholder-gray-400 font-medium"
                   />
                 </div>
               </div>
@@ -175,9 +175,9 @@ watch(selectedUserId, () => {
                     :disabled="isSearching"
                   >
                     <option :value="null">Todas as categorias</option>
-                    <option 
-                      v-for="category in categoryStore.allCategories" 
-                      :key="category.id" 
+                    <option
+                      v-for="category in categoryStore.allCategories"
+                      :key="category.id"
                       :value="category.id"
                     >
                       {{ category.nome }}
@@ -200,9 +200,9 @@ watch(selectedUserId, () => {
                     :disabled="isSearching"
                   >
                     <option :value="null">Todos os usuários</option>
-                    <option 
-                      v-for="user in usuarioStore.allUsers" 
-                      :key="user.id" 
+                    <option
+                      v-for="user in usuarioStore.allUsers"
+                      :key="user.id"
                       :value="user.id"
                     >
                       {{ user.nome }}
@@ -213,10 +213,10 @@ watch(selectedUserId, () => {
             </div>
 
             <div class="mt-6 flex justify-end">
-              <Button 
-                @click="clearSearch" 
-                variant="outline" 
-                size="sm" 
+              <Button
+                @click="clearSearch"
+                variant="outline"
+                size="sm"
                 class="mr-2 hover:bg-gray-100 transition-colors"
                 :disabled="isSearching || (!searchTerm && !selectedCategory && !selectedUserId)"
               >
@@ -227,8 +227,8 @@ watch(selectedUserId, () => {
                   Limpar Filtros
                 </span>
               </Button>
-              <Button 
-                @click="searchRecipes" 
+              <Button
+                @click="searchRecipes"
                 variant="primary"
                 size="sm"
                 :disabled="isSearching"
@@ -283,9 +283,9 @@ watch(selectedUserId, () => {
             </div>
 
             <ul v-else class="divide-y divide-gray-200">
-              <li 
-                v-for="recipe in recipeStore.recipes" 
-                :key="recipe.id" 
+              <li
+                v-for="recipe in recipeStore.recipes"
+                :key="recipe.id"
                 class="hover:bg-gray-50 cursor-pointer transition-colors duration-150"
                 @click="goToRecipeDetail(recipe.id)"
               >
@@ -321,8 +321,8 @@ watch(selectedUserId, () => {
                       <span>{{ recipe.usuario?.nome || 'Usuário desconhecido' }}</span>
                     </div>
                   </div>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     class="ml-4 flex-shrink-0 hover:bg-primary-red hover:text-white transition-colors duration-150"
                   >
@@ -341,10 +341,10 @@ watch(selectedUserId, () => {
             <div v-if="recipeStore.totalPages > 1" class="px-6 py-5 flex items-center justify-between border-t border-gray-200 bg-gray-50">
               <!-- Mobile pagination -->
               <div class="flex-1 flex justify-between sm:hidden">
-                <Button 
-                  :disabled="currentPage === 1" 
-                  @click="handlePageChange(currentPage - 1)" 
-                  variant="outline" 
+                <Button
+                  :disabled="currentPage === 1"
+                  @click="handlePageChange(currentPage - 1)"
+                  variant="outline"
                   size="sm"
                   class="flex items-center"
                   :class="currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white'"
@@ -354,10 +354,10 @@ watch(selectedUserId, () => {
                   </svg>
                   Anterior
                 </Button>
-                <Button 
-                  :disabled="currentPage === recipeStore.totalPages" 
-                  @click="handlePageChange(currentPage + 1)" 
-                  variant="outline" 
+                <Button
+                  :disabled="currentPage === recipeStore.totalPages"
+                  @click="handlePageChange(currentPage + 1)"
+                  variant="outline"
                   size="sm"
                   class="flex items-center"
                   :class="currentPage === recipeStore.totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white'"
@@ -373,17 +373,17 @@ watch(selectedUserId, () => {
               <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                 <div>
                   <p class="text-sm text-gray-700">
-                    Mostrando <span class="font-medium text-primary-red">{{ (currentPage - 1) * pageSize + 1 }}</span> a 
+                    Mostrando <span class="font-medium text-primary-red">{{ (currentPage - 1) * pageSize + 1 }}</span> a
                     <span class="font-medium text-primary-red">
                       {{ Math.min(currentPage * pageSize, recipeStore.pagination.totalItems) }}
-                    </span> de 
+                    </span> de
                     <span class="font-medium text-primary-red">{{ recipeStore.pagination.totalItems }}</span> resultados
                   </p>
                 </div>
                 <div>
                   <nav class="relative z-0 inline-flex rounded-md shadow-lg overflow-hidden" aria-label="Pagination">
                     <!-- Previous page button -->
-                    <a 
+                    <a
                       @click="currentPage > 1 && handlePageChange(currentPage - 1)"
                       :class="[
                         'relative inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium',
